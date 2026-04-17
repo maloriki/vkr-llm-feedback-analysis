@@ -1,145 +1,128 @@
 """
-Baseline 1: TF-IDF + XGBoost для классификации тональности.
-Запускается без API ключей, полностью локально.
+Baseline: TF-IDF + XGBoost.
+
+Обучается на ~89K отзывов из RuReviews, тестируется на 500.
+Результаты метрик сохраняются в results_tfidf_xgboost.json,
+предсказания — в predictions_tfidf_xgboost.csv.
 """
-import pandas as pd
-import numpy as np
 import json
 import time
+
+import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.model_selection import train_test_split
 from sklearn.metrics import (
-    accuracy_score, f1_score, precision_score, recall_score,
-    classification_report, confusion_matrix
+    accuracy_score, classification_report, confusion_matrix,
+    f1_score, precision_score, recall_score,
 )
+from sklearn.model_selection import train_test_split
 from xgboost import XGBClassifier
 
-# ===== 1. Load data =====
-print("=" * 60)
-print("BASELINE 1: TF-IDF + XGBoost")
-print("=" * 60)
+LABELS = ["negative", "neutral", "positive"]
 
-df = pd.read_csv('rureviews.csv', sep='\t')
-df['sentiment'] = df['sentiment'].replace({'neautral': 'neutral'})  # fix typo
 
-label_map = {'negative': 0, 'neutral': 1, 'positive': 2}
-label_names = ['negative', 'neutral', 'positive']
-df['label'] = df['sentiment'].map(label_map)
+def main():
+    print("=== TF-IDF + XGBoost ===\n")
 
-print(f"\nTotal reviews: {len(df)}")
-print(f"Class distribution:\n{df['sentiment'].value_counts().to_string()}")
+    # в датасете у neutral опечатка — "neautral"
+    df = pd.read_csv("rureviews.csv", sep="\t")
+    df["sentiment"] = df["sentiment"].replace({"neautral": "neutral"})
+    label_map = {lab: i for i, lab in enumerate(LABELS)}
+    df["label"] = df["sentiment"].map(label_map)
 
-# ===== 2. Train/Test split =====
-# Use 500 for test (same as LLM experiment), rest for train
-X = df['review'].values
-y = df['label'].values
+    print(f"Всего отзывов: {len(df)}")
+    print(df["sentiment"].value_counts().to_string(), "\n")
 
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=500, random_state=42, stratify=y
-)
-print(f"\nTrain size: {len(X_train)}")
-print(f"Test size: {len(X_test)}")
+    X_tr, X_te, y_tr, y_te = train_test_split(
+        df["review"].values, df["label"].values,
+        test_size=500, random_state=42, stratify=df["label"].values,
+    )
+    print(f"Train: {len(X_tr)} | Test: {len(X_te)}")
 
-# Save test set for LLM experiments
-test_df = pd.DataFrame({'review': X_test, 'label': y_test})
-test_df['sentiment'] = test_df['label'].map({v: k for k, v in label_map.items()})
-test_df.to_csv('test_set_500.csv', index=False)
-print("Test set saved to test_set_500.csv")
+    # сохраняем тестовую выборку — её же прогоняем через LLM
+    pd.DataFrame({
+        "review": X_te,
+        "label": y_te,
+        "sentiment": [LABELS[i] for i in y_te],
+    }).to_csv("test_set_500.csv", index=False)
 
-# ===== 3. TF-IDF vectorization =====
-print("\n--- TF-IDF Vectorization ---")
-t0 = time.time()
+    print("\n--- TF-IDF ---")
+    t0 = time.time()
+    tfidf = TfidfVectorizer(
+        max_features=50000,
+        ngram_range=(1, 2),
+        min_df=3,
+        max_df=0.95,
+        sublinear_tf=True,
+    )
+    X_tr_v = tfidf.fit_transform(X_tr)
+    X_te_v = tfidf.transform(X_te)
+    print(f"Словарь: {len(tfidf.vocabulary_)} | {time.time()-t0:.1f}s")
 
-tfidf = TfidfVectorizer(
-    max_features=50000,
-    ngram_range=(1, 2),
-    min_df=3,
-    max_df=0.95,
-    sublinear_tf=True
-)
+    print("\n--- XGBoost ---")
+    t0 = time.time()
+    clf = XGBClassifier(
+        n_estimators=300,
+        max_depth=6,
+        learning_rate=0.1,
+        eval_metric="mlogloss",
+        random_state=42,
+        n_jobs=-1,
+    )
+    clf.fit(X_tr_v, y_tr)
+    train_time = time.time() - t0
+    print(f"Обучение: {train_time:.1f}s")
 
-X_train_tfidf = tfidf.fit_transform(X_train)
-X_test_tfidf = tfidf.transform(X_test)
+    t0 = time.time()
+    y_pred = clf.predict(X_te_v)
+    infer_time = time.time() - t0
 
-print(f"Vocabulary size: {len(tfidf.vocabulary_)}")
-print(f"TF-IDF time: {time.time() - t0:.1f}s")
+    # --- метрики ---
+    acc = accuracy_score(y_te, y_pred)
+    f1 = f1_score(y_te, y_pred, average="macro")
+    prec = precision_score(y_te, y_pred, average="macro")
+    rec = recall_score(y_te, y_pred, average="macro")
 
-# ===== 4. XGBoost training =====
-print("\n--- XGBoost Training ---")
-t0 = time.time()
+    print(f"\nAccuracy = {acc:.4f}  |  Macro F1 = {f1:.4f}")
+    print(f"Precision = {prec:.4f}  |  Recall = {rec:.4f}")
+    print(f"Inference: {infer_time:.3f}s на {len(X_te)} отзывов\n")
 
-xgb = XGBClassifier(
-    n_estimators=300,
-    max_depth=6,
-    learning_rate=0.1,
-    eval_metric='mlogloss',
-    random_state=42,
-    n_jobs=-1
-)
+    print(classification_report(y_te, y_pred, target_names=LABELS, digits=4))
 
-xgb.fit(X_train_tfidf, y_train)
-train_time = time.time() - t0
-print(f"Training time: {train_time:.1f}s")
+    cm = confusion_matrix(y_te, y_pred)
+    print("Confusion matrix:")
+    print(pd.DataFrame(cm, index=LABELS, columns=LABELS).to_string())
 
-# ===== 5. Prediction =====
-t0 = time.time()
-y_pred = xgb.predict(X_test_tfidf)
-predict_time = time.time() - t0
-
-# ===== 6. Evaluation =====
-print("\n" + "=" * 60)
-print("RESULTS: TF-IDF + XGBoost")
-print("=" * 60)
-
-accuracy = accuracy_score(y_test, y_pred)
-macro_f1 = f1_score(y_test, y_pred, average='macro')
-macro_precision = precision_score(y_test, y_pred, average='macro')
-macro_recall = recall_score(y_test, y_pred, average='macro')
-
-print(f"\nAccuracy:        {accuracy:.4f}")
-print(f"Macro F1:        {macro_f1:.4f}")
-print(f"Macro Precision: {macro_precision:.4f}")
-print(f"Macro Recall:    {macro_recall:.4f}")
-
-print(f"\nTraining time:   {train_time:.1f}s")
-print(f"Inference time:  {predict_time:.3f}s (for {len(X_test)} reviews)")
-
-print("\n--- Classification Report ---")
-print(classification_report(y_test, y_pred, target_names=label_names, digits=4))
-
-print("--- Confusion Matrix ---")
-cm = confusion_matrix(y_test, y_pred)
-print(pd.DataFrame(cm, index=label_names, columns=label_names).to_string())
-
-# ===== 7. Save results =====
-results = {
-    'model': 'TF-IDF + XGBoost',
-    'accuracy': round(accuracy, 4),
-    'macro_f1': round(macro_f1, 4),
-    'macro_precision': round(macro_precision, 4),
-    'macro_recall': round(macro_recall, 4),
-    'train_time_s': round(train_time, 1),
-    'inference_time_s': round(predict_time, 3),
-    'test_size': len(X_test),
-    'per_class': {}
-}
-
-report = classification_report(y_test, y_pred, target_names=label_names,
-                                output_dict=True)
-for cls in label_names:
-    results['per_class'][cls] = {
-        'precision': round(report[cls]['precision'], 4),
-        'recall': round(report[cls]['recall'], 4),
-        'f1': round(report[cls]['f1-score'], 4),
+    # --- сохраняем результаты ---
+    report = classification_report(y_te, y_pred, target_names=LABELS, output_dict=True)
+    results = {
+        "model": "TF-IDF + XGBoost",
+        "accuracy": round(acc, 4),
+        "macro_f1": round(f1, 4),
+        "macro_precision": round(prec, 4),
+        "macro_recall": round(rec, 4),
+        "train_time_s": round(train_time, 1),
+        "inference_time_s": round(infer_time, 3),
+        "test_size": len(X_te),
+        "per_class": {
+            cls: {
+                "precision": round(report[cls]["precision"], 4),
+                "recall": round(report[cls]["recall"], 4),
+                "f1": round(report[cls]["f1-score"], 4),
+            }
+            for cls in LABELS
+        },
     }
+    with open("results_tfidf_xgboost.json", "w", encoding="utf-8") as f:
+        json.dump(results, f, ensure_ascii=False, indent=2)
 
-with open('results_tfidf_xgboost.json', 'w', encoding='utf-8') as f:
-    json.dump(results, f, ensure_ascii=False, indent=2)
+    pd.DataFrame({
+        "review": X_te,
+        "sentiment": [LABELS[i] for i in y_te],
+        "tfidf_xgb_pred": [LABELS[i] for i in y_pred],
+    }).to_csv("predictions_tfidf_xgboost.csv", index=False)
 
-print("\nResults saved to results_tfidf_xgboost.json")
+    print("\nСохранено: results_tfidf_xgboost.json, predictions_tfidf_xgboost.csv")
 
-# Save predictions for comparison
-pred_df = test_df.copy()
-pred_df['tfidf_xgb_pred'] = [label_names[p] for p in y_pred]
-pred_df.to_csv('predictions_tfidf_xgboost.csv', index=False)
-print("Predictions saved to predictions_tfidf_xgboost.csv")
+
+if __name__ == "__main__":
+    main()
