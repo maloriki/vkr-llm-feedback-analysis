@@ -1,0 +1,26 @@
+{
+  "model": "deepseek-r1:7b",
+  "accuracy": 0.48,
+  "macro_f1": 0.4964,
+  "total_time_s": 662.1,
+  "valid_predictions": 52,
+  "total_reviews": 100,
+  "test_subset": 100,
+  "per_class": {
+    "negative": {
+      "precision": 0.6,
+      "recall": 0.525,
+      "f1": 0.56
+    },
+    "neutral": {
+      "precision": 0.26,
+      "recall": 0.4643,
+      "f1": 0.3333
+    },
+    "positive": {
+      "precision": 0.9333,
+      "recall": 0.4375,
+      "f1": 0.5957
+    }
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "model": "qwen2.5:7b",
+  "accuracy": 0.656,
+  "macro_f1": 0.6341,
+  "macro_precision": 0.6787,
+  "macro_recall": 0.6565,
+  "total_time_s": 27916.1,
+  "avg_time_per_review_s": 55.83,
+  "valid_predictions": 492,
+  "total_reviews": 500,
+  "errors": 8,
+  "per_class": {
+    "negative": {
+      "precision": 0.5448,
+      "recall": 0.9157,
+      "f1": 0.6831
+    },
+    "neutral": {
+      "precision": 0.5422,
+      "recall": 0.2695,
+      "f1": 0.36
+    },
+    "positive": {
+      "precision": 0.9493,
+      "recall": 0.7844,
+      "f1": 0.859
+    }
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "model": "YandexGPT Embeddings + LogReg",
+  "accuracy": 0.675,
+  "macro_f1": 0.6759,
+  "macro_precision": 0.6854,
+  "macro_recall": 0.6717,
+  "total_time_s": 212.9,
+  "train_size": 300,
+  "test_size": 200,
+  "embedding_dim": 256,
+  "per_class": {
+    "negative": {
+      "precision": 0.7463,
+      "recall": 0.7042,
+      "f1": 0.7246
+    },
+    "neutral": {
+      "precision": 0.4932,
+      "recall": 0.5902,
+      "f1": 0.5373
+    },
+    "positive": {
+      "precision": 0.8167,
+      "recall": 0.7206,
+      "f1": 0.7656
+    }
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "model": "YandexGPT Pro",
+  "accuracy": 0.674,
+  "macro_f1": 0.6519,
+  "macro_precision": 0.6996,
+  "macro_recall": 0.6746,
+  "total_time_s": 539.4,
+  "avg_time_per_review_s": 1.08,
+  "total_tokens": 102907,
+  "est_cost_rub": 123.49,
+  "valid_predictions": 500,
+  "total_reviews": 500,
+  "errors": 0,
+  "per_class": {
+    "negative": {
+      "precision": 0.5643,
+      "recall": 0.9518,
+      "f1": 0.7085
+    },
+    "neutral": {
+      "precision": 0.5714,
+      "recall": 0.2874,
+      "f1": 0.3825
+    },
+    "positive": {
+      "precision": 0.9632,
+      "recall": 0.7844,
+      "f1": 0.8647
+    }
+  }
+}
