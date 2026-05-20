@@ -46,7 +46,9 @@ dp = Dispatcher(storage=MemoryStorage())
 # --- данные ---
 # хранятся в памяти: для демо этого достаточно
 data = {}
-chat_buffer: dict = {}
+chat_buffer: dict = {}             # chat_id -> [{text, sender, date}, ...]
+chat_meta: dict = {}               # chat_id -> {title, type, last_seen}
+selected_chat: dict = {}           # user_id -> chat_id (для анализа из лички)
 BUFFER_LIMIT = 200
 
 
@@ -247,12 +249,16 @@ async def start_cmd(msg: Message):
         "👋 *ИАС анализа обратной связи*\n\n"
         "ВКР | НИУ ВШЭ, Высшая школа бизнеса, 2026\n"
         "Модель: Qwen 2.5 7B (Ollama, self-hosted)\n\n"
+        "*🆕 Просто отправьте боту:*\n"
+        "• любой *текст* — LLM сделает аналитический разбор\n"
+        "• *файл* CSV / XLSX / TXT / JSON — пакетный анализ содержимого\n\n"
         "*В личке:*\n"
-        "/analyze — живой анализ 5 отзывов (≈30 сек)\n"
+        "/analyze — живой анализ 5 отзывов из RuReviews\n"
         "/report — аналитический отчёт на 20 отзывах\n"
         "/stats — статистика тестовой выборки\n"
         "/alerts — критические негативные темы\n"
-        "/compare — сравнение 6 моделей\n\n"
+        "/compare — сравнение 6 моделей\n"
+        "/chats — выбрать чат из подключённых\n\n"
         "*В группе (бот-админ):*\n"
         "/chat\\_analyze — анализ переписки с выбором периода\n"
         "/chat\\_stats — статистика собранных сообщений"
@@ -439,6 +445,13 @@ async def on_group_message(msg: Message):
     if len(buf) > BUFFER_LIMIT:
         del buf[:-BUFFER_LIMIT]
 
+    # Запоминаем мета чата для команды /chats
+    chat_meta[chat_id] = {
+        "title": msg.chat.title or msg.chat.full_name or f"chat#{chat_id}",
+        "type": msg.chat.type,
+        "last_seen": msg.date.strftime("%Y-%m-%d %H:%M") if msg.date else "",
+    }
+
 
 async def prompt_period(msg: Message):
     chat_id = msg.chat.id
@@ -562,7 +575,11 @@ async def on_period(cb: CallbackQuery, state: FSMContext):
             await cb.message.edit_reply_markup(reply_markup=None)
         except Exception:
             pass
-        await state.update_data(source_chat_id=cb.message.chat.id)
+        # В личке источник — выбранный чат, в группе — сам чат
+        src_id = (selected_chat.get(cb.from_user.id)
+                  if cb.message.chat.type == "private"
+                  else cb.message.chat.id)
+        await state.update_data(source_chat_id=src_id)
         await state.set_state(DateRange.start)
         await cb.message.answer(
             "🗓 *Свой диапазон дат*\n\n"
@@ -581,7 +598,14 @@ async def on_period(cb: CallbackQuery, state: FSMContext):
     except Exception:
         pass
 
-    chat_id = cb.message.chat.id
+    # В личке источник — выбранный чат, в группе — сам чат
+    if cb.message.chat.type == "private":
+        chat_id = selected_chat.get(cb.from_user.id)
+        if chat_id is None:
+            await cb.message.answer("⚠️ Сначала выберите чат через /chats.")
+            return
+    else:
+        chat_id = cb.message.chat.id
     all_msgs = chat_buffer.get(chat_id, [])
     filtered = filter_messages(all_msgs, hours=PERIOD_HOURS.get(period))
     await analyze_messages(cb.message, filtered, PERIOD_LABELS.get(period, period))
@@ -652,13 +676,23 @@ async def set_end_date(msg: Message, state: FSMContext):
 async def chat_analyze_dm(msg: Message):
     if msg.chat.type != "private":
         return  # уже обработано в групповом хэндлере
+    # В личке — если выбран чат через /chats, анализируем его
+    user_id = msg.from_user.id
+    target_chat_id = selected_chat.get(user_id)
+    if target_chat_id is None:
+        await msg.answer(
+            "💬 *Сначала выберите чат через /chats*\n\n"
+            "Либо вызовите /chat\\_analyze прямо в нужном групповом чате."
+        )
+        return
+    meta = chat_meta.get(target_chat_id, {})
+    n = len(chat_buffer.get(target_chat_id, []))
+    if n == 0:
+        await msg.answer("📭 В выбранном чате пока нет сообщений.")
+        return
     await msg.answer(
-        "💬 */chat\\_analyze работает в группах*\n\n"
-        "1. Добавьте бота в групповой чат.\n"
-        "2. Сделайте администратором (иначе не видит сообщения).\n"
-        "3. Напишите несколько сообщений.\n"
-        "4. Отправьте /chat\\_analyze → выберите период.\n\n"
-        "Для демо на клиентских отзывах: /analyze"
+        f"💬 Чат: *{meta.get('title','—')}*\nСобрано сообщений: {n}\n\n🗓 Выберите период:",
+        reply_markup=period_kb()
     )
 
 
@@ -666,7 +700,271 @@ async def chat_analyze_dm(msg: Message):
 async def chat_stats_dm(msg: Message):
     if msg.chat.type != "private":
         return
-    await msg.answer("💬 /chat\\_stats работает в групповых чатах.")
+    user_id = msg.from_user.id
+    target_chat_id = selected_chat.get(user_id)
+    if target_chat_id is None:
+        await msg.answer(
+            "💬 Сначала выберите чат через /chats — потом /chat\\_stats покажет статистику."
+        )
+        return
+    # Эмулируем msg для статистики выбранного чата
+    buf = chat_buffer.get(target_chat_id, [])
+    meta = chat_meta.get(target_chat_id, {})
+    if not buf:
+        await msg.answer("📭 В выбранном чате нет сообщений.")
+        return
+    senders = {}
+    for m in buf:
+        senders[m["sender"]] = senders.get(m["sender"], 0) + 1
+    top = sorted(senders.items(), key=lambda x: -x[1])[:5]
+    text = (
+        f"📊 *Статистика чата:* {meta.get('title','—')}\n\n"
+        f"Сообщений: {len(buf)}\n"
+        f"Авторов: {len(senders)}\n"
+        f"Первое: {buf[0]['date']}\nПоследнее: {buf[-1]['date']}\n\n"
+        "*Активные участники:*\n"
+    )
+    for s, c in top:
+        name = s.replace("*", "").replace("_", "")[:30]
+        text += f"• {name}: {c}\n"
+    text += "\n*По периодам:*\n"
+    for key in ("1d", "3d", "7d", "30d"):
+        cnt = len(filter_messages(buf, hours=PERIOD_HOURS[key]))
+        text += f"• {PERIOD_LABELS[key]}: {cnt}\n"
+    text += "\n💡 /chat\\_analyze — запустить анализ."
+    await msg.answer(text)
+
+
+# ============================================================
+#  /chats — список доступных чатов и выбор для анализа из лички
+# ============================================================
+
+@dp.message(Command("chats"))
+async def list_chats(msg: Message):
+    if msg.chat.type != "private":
+        await msg.answer("💬 /chats работает только в личке с ботом.")
+        return
+    if not chat_meta:
+        await msg.answer(
+            "📭 *Пока ни одного чата.*\n\n"
+            "Чтобы добавить чат для анализа:\n"
+            "1. Добавьте бота в групповой чат\n"
+            "2. Сделайте *администратором* (иначе бот не видит сообщения)\n"
+            "3. Напишите там несколько сообщений\n"
+            "4. Вернитесь в личку и снова /chats"
+        )
+        return
+    buttons = []
+    for cid, meta in chat_meta.items():
+        n = len(chat_buffer.get(cid, []))
+        title = meta.get("title", "—")[:35]
+        buttons.append([InlineKeyboardButton(
+            text=f"💬 {title} ({n} сообщ.)",
+            callback_data=f"selchat:{cid}"
+        )])
+    kb = InlineKeyboardMarkup(inline_keyboard=buttons)
+    user_id = msg.from_user.id
+    current = selected_chat.get(user_id)
+    current_meta = chat_meta.get(current, {}) if current else {}
+    current_str = f"\n\n📌 *Текущий выбор:* {current_meta.get('title','—')}" if current else ""
+    await msg.answer(
+        f"💬 *Доступные чаты* ({len(chat_meta)}){current_str}\n\n"
+        "Выберите чат — потом /chat\\_analyze или /chat\\_stats:",
+        reply_markup=kb
+    )
+
+
+@dp.callback_query(F.data.startswith("selchat:"))
+async def on_chat_select(cb: CallbackQuery):
+    chat_id = int(cb.data.split(":", 1)[1])
+    user_id = cb.from_user.id
+    selected_chat[user_id] = chat_id
+    meta = chat_meta.get(chat_id, {})
+    n = len(chat_buffer.get(chat_id, []))
+    await cb.answer(f"Выбран чат: {meta.get('title','—')}")
+    try:
+        await cb.message.edit_reply_markup(reply_markup=None)
+    except Exception:
+        pass
+    await cb.message.answer(
+        f"✅ *Выбран чат:* {meta.get('title','—')}\n"
+        f"Сообщений в буфере: {n}\n\n"
+        "📊 /chat\\_stats — статистика\n"
+        "🔬 /chat\\_analyze — анализ LLM"
+    )
+
+
+# ============================================================
+#  Свободный анализ: текст в личке + загрузка файлов CSV/XLSX/TXT/JSON
+# ============================================================
+
+FREEFORM_SYSTEM = (
+    "Ты — опытный бизнес-аналитик. На входе тебе дают произвольный текст "
+    "(отзыв, переписка, фрагмент данных). Сделай краткий аналитический "
+    "разбор на русском языке: тональность, ключевые темы, проблемы или "
+    "позитив, краткие рекомендации. Структурируй ответ маркированным списком, "
+    "пиши по делу, без воды."
+)
+
+
+async def analyze_freeform_text(target, text: str, label: str = "сообщение"):
+    """LLM-разбор произвольного текста."""
+    text = text.strip()
+    if len(text) < 5:
+        await target.answer("⚠️ Сообщение слишком короткое для анализа.")
+        return
+    await target.answer(
+        f"🔍 *Анализирую {label}*\nМодель: `{MODEL}`\n⏳ Жду ответа..."
+    )
+    t0 = time.time()
+    try:
+        raw = ask_llm(text[:4000], FREEFORM_SYSTEM, max_tokens=500, timeout=120)
+    except Exception as e:
+        await target.answer(f"⚠️ Ошибка LLM: {e}")
+        return
+    dt = time.time() - t0
+    body = raw.replace("_", "\\_").replace("[", "\\[").replace("]", "\\]")
+    await target.answer(f"✅ Готово за {dt:.1f} с\n─────────────────")
+    await send_long(target, body)
+
+
+def extract_texts_from_file(file_bytes: bytes, filename: str) -> tuple[list, str]:
+    """Парсит файл, возвращает (список_текстов, описание_формата).
+    Поддерживает: CSV, XLSX, TXT, JSON."""
+    name = filename.lower()
+    import io as _io
+    if name.endswith(".csv"):
+        # Пробуем несколько кодировок
+        for enc in ("utf-8", "cp1251", "latin-1"):
+            try:
+                df = pd.read_csv(_io.BytesIO(file_bytes), encoding=enc)
+                break
+            except Exception:
+                df = None
+        if df is None:
+            return [], "CSV (не удалось распарсить)"
+        return _texts_from_df(df), f"CSV ({len(df)} строк, {len(df.columns)} колонок)"
+    if name.endswith((".xlsx", ".xls")):
+        df = pd.read_excel(_io.BytesIO(file_bytes))
+        return _texts_from_df(df), f"Excel ({len(df)} строк, {len(df.columns)} колонок)"
+    if name.endswith(".json"):
+        import json as _json
+        try:
+            data_obj = _json.loads(file_bytes.decode("utf-8"))
+        except Exception:
+            return [], "JSON (битый)"
+        if isinstance(data_obj, list):
+            # Список словарей или строк
+            texts = []
+            for item in data_obj:
+                if isinstance(item, str):
+                    texts.append(item)
+                elif isinstance(item, dict):
+                    for key in ("text", "review", "comment", "message", "body"):
+                        if key in item and isinstance(item[key], str):
+                            texts.append(item[key])
+                            break
+            return texts, f"JSON-массив ({len(texts)} элементов)"
+        if isinstance(data_obj, dict):
+            return [str(data_obj)[:4000]], "JSON-объект"
+        return [str(data_obj)[:4000]], "JSON"
+    # TXT и всё остальное — как текст
+    try:
+        text = file_bytes.decode("utf-8")
+    except UnicodeDecodeError:
+        text = file_bytes.decode("cp1251", errors="ignore")
+    # Разбиваем по непустым строкам
+    lines = [l.strip() for l in text.split("\n") if len(l.strip()) > 5]
+    return lines, f"Текст ({len(lines)} непустых строк)"
+
+
+def _texts_from_df(df) -> list:
+    """Найти подходящую текстовую колонку в DataFrame."""
+    # Приоритет — типовые имена
+    for cand in ("text", "review", "comment", "message", "feedback", "body", "content"):
+        for col in df.columns:
+            if col.lower().strip() == cand:
+                return [str(v) for v in df[col].dropna().tolist() if str(v).strip()]
+    # Иначе — первая колонка типа object/string
+    for col in df.columns:
+        if df[col].dtype == object:
+            return [str(v) for v in df[col].dropna().tolist() if str(v).strip()]
+    # Иначе — первая колонка как есть
+    return [str(v) for v in df.iloc[:, 0].dropna().tolist()]
+
+
+@dp.message(F.chat.type == "private", F.document)
+async def on_document(msg: Message):
+    """Принимает CSV/XLSX/TXT/JSON и анализирует содержимое через LLM."""
+    doc = msg.document
+    fname = doc.file_name or "file"
+    fsize_mb = (doc.file_size or 0) / 1024 / 1024
+    if fsize_mb > 20:
+        await msg.answer(f"⚠️ Файл слишком большой ({fsize_mb:.1f} МБ). Лимит 20 МБ.")
+        return
+
+    await msg.answer(
+        f"📎 *Принял файл:* `{fname}`\nРазмер: {fsize_mb:.2f} МБ\n⏳ Загружаю..."
+    )
+    # Скачиваем
+    try:
+        bio = await bot.download(doc)
+        file_bytes = bio.read()
+    except Exception as e:
+        await msg.answer(f"⚠️ Не удалось скачать: {e}")
+        return
+
+    # Парсим
+    try:
+        texts, fmt = extract_texts_from_file(file_bytes, fname)
+    except Exception as e:
+        await msg.answer(f"⚠️ Не смог разобрать файл ({fname}): {e}")
+        return
+
+    if not texts:
+        await msg.answer(f"⚠️ Не нашёл подходящих данных в {fmt}.")
+        return
+
+    sample = texts[:20] if len(texts) > 20 else texts
+    await msg.answer(
+        f"📊 *Формат:* {fmt}\n"
+        f"Найдено фрагментов: {len(texts)}\n"
+        f"Анализирую первые {len(sample)} через LLM...\n"
+        f"⏳ ~{int(len(sample) * 5)} с..."
+    )
+
+    t0 = time.time()
+    joined = "\n\n".join(f"{i+1}. {t[:300]}" for i, t in enumerate(sample))
+    system = (
+        "Ты — опытный бизнес-аналитик. На входе — пакет коротких текстовых "
+        "сообщений (отзывы, комментарии, переписка). Сделай сводный анализ "
+        "на русском языке: 1) распределение тональности, 2) топ-3 ключевые темы, "
+        "3) топ-3 проблемы или жалобы, 4) краткие рекомендации. "
+        "Формат — маркированные списки, без воды."
+    )
+    try:
+        raw = ask_llm(joined[:8000], system, max_tokens=700, timeout=180)
+    except Exception as e:
+        await msg.answer(f"⚠️ Ошибка LLM: {e}")
+        return
+    dt = time.time() - t0
+    body = raw.replace("_", "\\_").replace("[", "\\[").replace("]", "\\]")
+    await msg.answer(
+        f"✅ Готово за {dt:.1f} с\n"
+        f"Файл: `{fname}`\nПроанализировано: {len(sample)} из {len(texts)}\n"
+        "─────────────────"
+    )
+    await send_long(msg, body)
+
+
+@dp.message(F.chat.type == "private", F.text & ~F.text.startswith("/"))
+async def on_freeform_text(msg: Message, state: FSMContext):
+    """Любое текстовое сообщение в личке (не команда) — LLM-разбор.
+    Игнорируем когда активен FSM (например, ввод дат)."""
+    cur = await state.get_state()
+    if cur is not None:
+        return  # пусть FSM-хэндлеры разбираются
+    await analyze_freeform_text(msg, msg.text or "")
 
 
 # --- старт ---
@@ -686,8 +984,9 @@ async def main():
         BotCommand(command="stats", description="📊 Статистика выборки"),
         BotCommand(command="alerts", description="🚨 Критические темы"),
         BotCommand(command="compare", description="🏆 Сравнение моделей"),
-        BotCommand(command="chat_analyze", description="💬 Анализ группы"),
-        BotCommand(command="chat_stats", description="💬 Статистика группы"),
+        BotCommand(command="chats", description="💬 Список чатов для анализа"),
+        BotCommand(command="chat_analyze", description="💬 Анализ выбранного/текущего чата"),
+        BotCommand(command="chat_stats", description="💬 Статистика выбранного/текущего чата"),
         BotCommand(command="help", description="Справка"),
     ])
     log.info("Bot ready")
