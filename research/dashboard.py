@@ -32,9 +32,9 @@ def _find(*paths):
 def load_data():
     data = {}
 
-    # Load results JSONs from experiments/results/ or current dir
+    # dashboard.py теперь в research/, рядом папка results/
     base = os.path.dirname(os.path.abspath(__file__))
-    search_dirs = [os.path.join(base, 'experiments', 'results'), base, '.']
+    search_dirs = [os.path.join(base, 'results'), base, '.']
     seen = set()
     for sd in search_dirs:
         if not os.path.isdir(sd):
@@ -45,18 +45,16 @@ def load_data():
                 with open(os.path.join(sd, f), 'r', encoding='utf-8') as fh:
                     data[f] = json.load(fh)
 
-    # Load predictions
     preds = {}
-    p_qwen = _find('experiments/results/predictions_qwen2.5_7b.csv', 'predictions_qwen2.5_7b.csv')
+    p_qwen = _find('results/predictions_qwen2.5_7b.csv', 'predictions_qwen2.5_7b.csv')
     if p_qwen:
         preds['qwen'] = pd.read_csv(p_qwen)
-    p_tfidf = _find('experiments/results/predictions_tfidf_xgboost.csv', 'predictions_tfidf_xgboost.csv')
+    p_tfidf = _find('results/predictions_tfidf_xgboost.csv', 'predictions_tfidf_xgboost.csv')
     if p_tfidf:
         preds['tfidf'] = pd.read_csv(p_tfidf)
 
-    # Load test set
     test_df = None
-    p_test = _find('test_set_500.csv')
+    p_test = _find('data/test_set_500.csv', 'test_set_500.csv')
     if p_test:
         test_df = pd.read_csv(p_test)
 
@@ -366,7 +364,7 @@ with tab4:
         st.dataframe(test_df.head(20), use_container_width=True)
 
     # Analytical report demo
-    arm_path = _find('experiments/analytical_report_demo.md', 'analytical_report_demo.md')
+    arm_path = _find('analytical_report_demo.md')
     if arm_path:
         st.subheader("Пример аналитического отчёта (MAP-фаза)")
         with open(arm_path, 'r', encoding='utf-8') as f:

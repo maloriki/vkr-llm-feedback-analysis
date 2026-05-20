@@ -1,103 +1,105 @@
-# vkr-llm-feedback-analysis
+# Анализ обратной связи на больших языковых моделях
 
-**ВКР Биксалина Артёма Ильнуровича** | НИУ ВШЭ, Высшая школа бизнеса, ББИ-221, 2026
+Привет 👋
 
-Информационно-аналитическая система (ИАС) для автоматизированного мульти-источникового анализа обратной связи в логистической e-commerce компании на основе больших языковых моделей.
+Это репозиторий моей выпускной квалификационной работы. Сделал систему, которая разбирает клиентские отзывы и переписку курьеров через LLM — вместо того чтобы аналитик сидел и читал каждый отзыв руками.
 
-## Структура репозитория
+Внутри: текст ВКР, диаграммы, экспериментальные скрипты со всеми результатами и работающий Telegram-бот.
 
-```
-.
-├── vkr_thesis/             # текст ВКР: PDF, аннотации
-├── diagrams/               # все 12 диаграмм из ВКР
-│   ├── images/             # финальные PNG
-│   ├── sources/            # исходники: drawio, bpmn, puml, archimate
-│   ├── svg/                # векторные версии
-│   └── code/               # python-генераторы
-├── experiments/            # сравнение 7 моделей
-│   ├── results/            # results_*.json + predictions_*.csv
-│   ├── analytical_report_demo.md
-│   └── README.md           # выводы по моделям
-├── 01_baseline_tfidf.py    # TF-IDF + XGBoost
-├── 02_llm_pipeline.py      # универсальный Ollama-пайплайн
-├── 03_llm_gpt35.py         # GPT-3.5
-├── 04_deepseek_100.py      # DeepSeek на 100 отзывах
-├── 05_yandexgpt.py         # YandexGPT Pro
-├── 06_yandex_classifier.py # YandexGPT Embeddings/Classifier
-├── prompts.py              # системные промпты
-├── dashboard.py            # Streamlit-дашборд
-├── telegram_bot.py         # Telegram-бот (aiogram 3, multi-chat, файлы)
-├── test_set_500.csv        # балансированная выборка для эксперимента
-├── rureviews.csv           # полный датасет
-├── PROJECT_BRIEF.md        # бриф для передачи контекста
-├── requirements.txt
-└── .gitignore
-```
+## Что лежит в репо
 
-## Быстрый старт
+| Папка | Что внутри |
+|---|---|
+| [vkr_thesis/](vkr_thesis/) | Текст ВКР (PDF, 94 страницы) + аннотации на русском и английском |
+| [diagrams/](diagrams/) | 12 диаграмм из ВКР + редактируемые исходники (drawio / bpmn / puml / archimate) + SVG-версии |
+| [research/](research/) | Сравнение 7 моделей: скрипты, датасеты, results (JSON+CSV), Streamlit-дашборд, пример отчёта LLM |
+| [bot/](bot/) | Telegram-бот на aiogram 3 — умеет анализировать тексты, файлы и групповые чаты |
 
-### Воспроизвести эксперимент
+## О чём работа
+
+Логистическая e-commerce компания каждую неделю получает несколько тысяч отзывов и кучу сообщений в курьерских чатах. Аналитик читает это руками, тратит 6-8 часов на пачку 200-500 отзывов и упускает важные сигналы — потому что физически не успевает.
+
+Я сделал систему, которая делает то же самое за минуты:
+- собирает данные из OMS и Telegram параллельно,
+- режет на пакеты (auto-batching под контекстное окно конкретной модели),
+- прогоняет через LLM (MapReduce: каждый пакет анализируется отдельно, потом результаты сводятся в один отчёт),
+- выдаёт инсайты, темы и рекомендации — с цитатами из исходных отзывов.
+
+Параллельно сравнил 7 моделей на 500 балансированных отзывах RuReviews, чтобы выбрать оптимальную для self-hosted развёртывания.
+
+## Результаты сравнения моделей
+
+| Модель | Macro F1 | Где работает | Инсайты |
+|---|---:|---|:---:|
+| TF-IDF + XGBoost | **0,747** | локально | ❌ только классификация |
+| YandexGPT Embeddings + LogReg | 0,676 | гибрид | ❌ |
+| YandexGPT Pro | 0,652 | облако | ✅ |
+| DeepSeek LLM 7B | 0,640 | self-hosted | ✅ |
+| **Qwen 2.5 7B** | 0,634 | **self-hosted** | ✅ |
+| DeepSeek R1 7B | 0,496 | self-hosted | ⚠️ reasoning, не для классификации |
+| YandexGPT Classifier | 0,167 | облако | ❌ zero-shot не работает без few-shot |
+
+Для production выбран **Qwen 2.5 7B** — он чуть-чуть проигрывает DeepSeek по точности (статистически неразличимо, CI пересекаются), но даёт контекстное окно 32K токенов против 4K у DeepSeek. Это критично для пакетной обработки.
+
+Подробнее → [research/EXPERIMENT_RESULTS.md](research/EXPERIMENT_RESULTS.md).
+
+## Как запустить
+
+### Дашборд (4 вкладки со сравнением моделей)
 
 ```bash
 pip install -r requirements.txt
-python 01_baseline_tfidf.py
-python 02_llm_pipeline.py --model qwen2.5:7b
+streamlit run research/dashboard.py
 ```
 
-Результаты появятся в `experiments/results/`.
+### Telegram-бот
 
-### Запустить дашборд
-
+Нужен Ollama с моделью:
 ```bash
-streamlit run dashboard.py
-```
-
-Откроется на http://localhost:8501 — четыре вкладки: Сравнение моделей, Анализ предсказаний, Инсайты LLM, Данные.
-
-### Запустить Telegram-бот
-
-```bash
-# Установить Ollama (https://ollama.com/download) и модель:
+# https://ollama.com/download
 ollama pull qwen2.5:7b
+```
 
-# Запустить бота:
-export BOT_TOKEN=<токен от @BotFather>
-python telegram_bot.py
+Получите токен у [@BotFather](https://t.me/BotFather) и запустите:
+```bash
+export BOT_TOKEN="ваш_токен"
+python bot/telegram_bot.py
 ```
 
 Бот: [@vkr_reviews_analyzer_bot](https://t.me/vkr_reviews_analyzer_bot)
 
-Команды:
-- `/analyze`, `/report`, `/stats`, `/alerts`, `/compare` — демо на встроенной выборке
-- `/chats` — список подключённых групповых чатов с inline-выбором
-- `/chat_analyze`, `/chat_stats` — анализ выбранного/текущего чата
-- **Любой текст** в личке → LLM делает аналитический разбор
-- **CSV / XLSX / TXT / JSON файл** → пакетный анализ содержимого
+Что умеет:
+- разобрать любой текст в личке (просто пишите боту → LLM сделает аналитический разбор)
+- принять файл CSV / XLSX / TXT / JSON → пакетный анализ содержимого
+- собирать сообщения из групповых чатов (нужны права админа) → `/chat_analyze` за выбранный период
+- `/chats` в личке → выбрать любой подключённый чат для анализа
 
-## Финальный текст ВКР
+### Воспроизвести эксперимент
 
-**[vkr_thesis/VKR_Biksalin_final.pdf](vkr_thesis/VKR_Biksalin_final.pdf)** (94 страницы, прошёл LMS НИУ ВШЭ).
+```bash
+cd research
+python scripts/01_baseline_tfidf.py
+python scripts/02_llm_pipeline.py --model qwen2.5:7b
+# и так далее
+```
 
-## Ключевые результаты (7 моделей, RuReviews-500)
+Результаты лягут в `research/results/`.
 
-| Модель | Macro F1 | Тип | Инсайты |
-|---|---:|---|:---:|
-| TF-IDF + XGBoost | **0,747** | классификатор | ❌ |
-| YandexGPT Embeddings + LogReg | 0,676 | классификатор (300 экз.) | ❌ |
-| YandexGPT Pro | 0,652 | LLM, облако | ✅ |
-| DeepSeek LLM 7B | 0,640 | LLM, self-hosted | ✅ |
-| **Qwen 2.5 7B** | 0,634 | **рекомендованная** self-hosted | ✅ |
-| DeepSeek R1 7B | 0,496 | reasoning | ⚠️ |
-| YandexGPT Classifier | 0,167 | zero-shot облачный | ❌ |
+## Стек
 
-Подробный разбор — в [experiments/README.md](experiments/README.md).
+- Python 3.10+, pandas, scikit-learn, xgboost
+- Ollama для self-hosted LLM (Qwen 2.5, DeepSeek)
+- Yandex Cloud SDK для облачного YandexGPT
+- FastAPI (запланирован), Streamlit (дашборд), aiogram 3 (бот)
+- PostgreSQL + MinIO в архитектуре, для прототипа достаточно in-memory
 
-## Реквизиты
+## Об авторе
 
-- **Автор**: Биксалин Артём Ильнурович, ББИ-221
-- **Научный руководитель**: Попов Виктор Юрьевич, профессор департамента бизнес-информатики ВШБ НИУ ВШЭ
-- **Защита**: 17.05.2026
+**Биксалин Артём Ильнурович**, ББИ-221
+НИУ ВШЭ, Высшая школа бизнеса
+Научный руководитель: Попов Виктор Юрьевич, профессор департамента бизнес-информатики ВШБ НИУ ВШЭ
+Защита: 17 мая 2026
 
-## Контакты
+---
 
-Telegram: [@vkr_reviews_analyzer_bot](https://t.me/vkr_reviews_analyzer_bot)
+Если что-то ломается или есть вопросы — пишите боту [@vkr_reviews_analyzer_bot](https://t.me/vkr_reviews_analyzer_bot) или открывайте issue.

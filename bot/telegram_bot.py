@@ -66,19 +66,26 @@ def _find_file(*candidates):
 
 def load_data():
     """Загружаем результаты экспериментов и тестовую выборку.
-    Поддерживаются обе структуры: новая (experiments/results/...) и плоский корень."""
-    test_path = _find_file("test_set_500.csv")
+    Структура репо: bot/ и research/ на одном уровне."""
+    test_path = _find_file(
+        "../research/data/test_set_500.csv",
+        "test_set_500.csv",
+    )
     data["test"] = pd.read_csv(test_path) if test_path else None
 
     preds_path = _find_file(
-        "experiments/results/predictions_qwen2.5_7b.csv",
+        "../research/results/predictions_qwen2.5_7b.csv",
         "predictions_qwen2.5_7b.csv",
     )
     data["preds"] = pd.read_csv(preds_path) if preds_path else None
 
     data["results"] = {}
     base = os.path.dirname(os.path.abspath(__file__))
-    search_dirs = [os.path.join(base, "experiments", "results"), base, "."]
+    search_dirs = [
+        os.path.join(base, "..", "research", "results"),
+        base,
+        ".",
+    ]
     seen = set()
     for sd in search_dirs:
         if not os.path.isdir(sd):
@@ -94,7 +101,7 @@ def load_data():
                     pass
 
     report_path = _find_file(
-        "experiments/analytical_report_demo.md",
+        "../research/analytical_report_demo.md",
         "analytical_report_demo.md",
     )
     if report_path:
