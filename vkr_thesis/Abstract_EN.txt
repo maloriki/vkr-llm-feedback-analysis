@@ -1,0 +1,11 @@
+ABSTRACT
+
+This bachelor thesis presents the design, implementation and validation of an analytical information system based on large language models (LLMs) for the automated multi-source analysis of customer feedback in an e-commerce company. The research object is the business process of analyzing customer reviews and internal courier communications; the subject — the methods and technologies for automating operational analytics with LLMs.
+
+The work develops a multi-source LLM pipeline architecture based on the MapReduce pattern and adaptive auto-batching that adjusts to the context windows of different models. A software prototype is implemented in Python using Ollama (self-hosted LLMs), FastAPI, PostgreSQL, a Streamlit analytical dashboard and an aiogram 3 Telegram bot. A comparative experiment with seven models (TF-IDF + XGBoost, YandexGPT Pro, YandexGPT Embeddings, YandexGPT Classifier, Qwen 2.5 7B, DeepSeek LLM 7B, DeepSeek R1 7B) is conducted on a balanced RuReviews sample of 500 customer reviews. Qwen 2.5 7B is selected as the optimal self-hosted model based on a combination of quality metrics (Macro F1 = 0.634), throughput and Russian language support.
+
+The annual economic effect of the implementation is calculated: feedback analysis labor is reduced from 18.5 to 2.5 hours per week per team, equivalent to savings of approximately 780,000 RUB per year. A register of 12 project risks with a probability × impact matrix and a system of 13 key performance indicators are developed.
+
+Practical significance: the proposed framework is applicable to e-commerce and service-oriented organizations, enabling the transition from reactive to proactive feedback analytics while complying with the Russian Federal Law 152-FZ on Personal Data.
+
+Keywords: large language models (LLM), analytical information system, customer feedback analysis, MapReduce, auto-batching, e-commerce, self-hosted, Qwen 2.5, DeepSeek, YandexGPT, business process reengineering.
