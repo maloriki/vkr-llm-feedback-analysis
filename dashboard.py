@@ -17,27 +17,48 @@ st.set_page_config(
 )
 
 # ===== LOAD DATA =====
+def _find(*paths):
+    """Возвращает первый существующий путь относительно скрипта или cwd."""
+    base = os.path.dirname(os.path.abspath(__file__))
+    for p in paths:
+        for root in (base, '.'):
+            full = os.path.join(root, p)
+            if os.path.exists(full):
+                return full
+    return None
+
+
 @st.cache_data
 def load_data():
     data = {}
 
-    # Load results JSONs
-    for f in os.listdir('.'):
-        if f.startswith('results_') and f.endswith('.json'):
-            with open(f, 'r', encoding='utf-8') as fh:
-                data[f] = json.load(fh)
+    # Load results JSONs from experiments/results/ or current dir
+    base = os.path.dirname(os.path.abspath(__file__))
+    search_dirs = [os.path.join(base, 'experiments', 'results'), base, '.']
+    seen = set()
+    for sd in search_dirs:
+        if not os.path.isdir(sd):
+            continue
+        for f in os.listdir(sd):
+            if f.startswith('results_') and f.endswith('.json') and f not in seen:
+                seen.add(f)
+                with open(os.path.join(sd, f), 'r', encoding='utf-8') as fh:
+                    data[f] = json.load(fh)
 
     # Load predictions
     preds = {}
-    if os.path.exists('predictions_qwen2.5_7b.csv'):
-        preds['qwen'] = pd.read_csv('predictions_qwen2.5_7b.csv')
-    if os.path.exists('predictions_tfidf_xgboost.csv'):
-        preds['tfidf'] = pd.read_csv('predictions_tfidf_xgboost.csv')
+    p_qwen = _find('experiments/results/predictions_qwen2.5_7b.csv', 'predictions_qwen2.5_7b.csv')
+    if p_qwen:
+        preds['qwen'] = pd.read_csv(p_qwen)
+    p_tfidf = _find('experiments/results/predictions_tfidf_xgboost.csv', 'predictions_tfidf_xgboost.csv')
+    if p_tfidf:
+        preds['tfidf'] = pd.read_csv(p_tfidf)
 
     # Load test set
     test_df = None
-    if os.path.exists('test_set_500.csv'):
-        test_df = pd.read_csv('test_set_500.csv')
+    p_test = _find('test_set_500.csv')
+    if p_test:
+        test_df = pd.read_csv(p_test)
 
     return data, preds, test_df
 
@@ -345,8 +366,9 @@ with tab4:
         st.dataframe(test_df.head(20), use_container_width=True)
 
     # Analytical report demo
-    if os.path.exists('analytical_report_demo.md'):
+    arm_path = _find('experiments/analytical_report_demo.md', 'analytical_report_demo.md')
+    if arm_path:
         st.subheader("Пример аналитического отчёта (MAP-фаза)")
-        with open('analytical_report_demo.md', 'r', encoding='utf-8') as f:
+        with open(arm_path, 'r', encoding='utf-8') as f:
             report = f.read()
         st.markdown(report)

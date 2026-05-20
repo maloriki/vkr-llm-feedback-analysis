@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<archimate:model xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:archimate="http://www.archimatetool.com/archimate" name="ИАС — Business Cooperation (ВКР Биксалин)" id="id-model-bizcoop" version="5.0.0">
+  <folder name="Strategy" id="id-a2c5d6a526ea45dbb1c3108dc996661a" type="strategy">
+    <element xsi:type="archimate:Capability" name="Аналитика клиентского опыта" id="id-cap1"/>
+    <element xsi:type="archimate:Capability" name="Раннее выявление операционных инцидентов" id="id-cap2"/>
+    <element xsi:type="archimate:Capability" name="Управление качеством сервиса доставки" id="id-cap3"/>
+  </folder>
+  <folder name="Business" id="id-551591a973be42669aa7c988e480d833" type="business">
+    <folder name="Business — AS-IS" id="id-d03c2443c4714c92a36f9e705380ff12">
+      <element xsi:type="archimate:BusinessProcess" name="Ручное чтение отзывов и чатов" id="id-pas1"/>
+      <element xsi:type="archimate:BusinessProcess" name="Субъективная категоризация в Excel" id="id-pas2"/>
+      <element xsi:type="archimate:BusinessProcess" name="Сведение в статичный отчёт" id="id-pas3"/>
+      <element xsi:type="archimate:BusinessProcess" name="Передача отчёта руководителю" id="id-pas4"/>
+      <element xsi:type="archimate:BusinessProcess" name="Реактивный отклик на жалобы" id="id-pas5"/>
+      <element xsi:type="archimate:BusinessService" name="Статичный Excel-отчёт" id="id-sas1"/>
+      <element xsi:type="archimate:BusinessService" name="Эпизодический разбор топ-проблем" id="id-sas2"/>
+      <element xsi:type="archimate:BusinessService" name="Личные рекомендации руководителя" id="id-sas3"/>
+      <element xsi:type="archimate:BusinessService" name="Реактивный ответ на жалобу" id="id-sas4"/>
+    </folder>
+    <folder name="Business — TO-BE" id="id-0984742fa29e488285d1717b6071ddc0">
+      <element xsi:type="archimate:BusinessProcess" name="Сбор обратной связи" id="id-pto1"/>
+      <element xsi:type="archimate:BusinessProcess" name="Препроцессинг и батчинг" id="id-pto2"/>
+      <element xsi:type="archimate:BusinessProcess" name="LLM-анализ пакетов (Map)" id="id-pto3"/>
+      <element xsi:type="archimate:BusinessProcess" name="Агрегация результатов (Reduce)" id="id-pto4"/>
+      <element xsi:type="archimate:BusinessProcess" name="Формирование аналитического отчёта" id="id-pto5"/>
+      <element xsi:type="archimate:BusinessProcess" name="Эскалация критических сигналов" id="id-pto6"/>
+      <element xsi:type="archimate:BusinessService" name="Сервис аналитики тональности" id="id-sto1"/>
+      <element xsi:type="archimate:BusinessService" name="Сервис выявления топ-проблем" id="id-sto2"/>
+      <element xsi:type="archimate:BusinessService" name="Сервис рекомендаций по улучшению" id="id-sto3"/>
+      <element xsi:type="archimate:BusinessService" name="Сервис алертинга" id="id-sto4"/>
+    </folder>
+    <folder name="Business — Actors" id="id-67495e7e7dff4e4b95f6e4b91cefb5a2">
+      <element xsi:type="archimate:BusinessActor" name="Менеджер по качеству сервиса" id="id-a1"/>
+      <element xsi:type="archimate:BusinessActor" name="Руководитель логистики" id="id-a2"/>
+      <element xsi:type="archimate:BusinessActor" name="Продуктовая команда" id="id-a3"/>
+    </folder>
+  </folder>
+  <folder name="Application" id="id-b9f60eca022442e9be08b04f9ef347ab" type="application"/>
+  <folder name="Technology &amp; Physical" id="id-542576afa393441fbab37cf65d7dac28" type="technology"/>
+  <folder name="Motivation" id="id-a67761c65da34983ad408a78803b525c" type="motivation"/>
+  <folder name="Implementation &amp; Migration" id="id-577682b9103a4cc695bd758137320b13" type="implementation_migration"/>
+  <folder name="Other" id="id-97a5dcf915fd43e29ff2999dbecb3357" type="other"/>
+  <folder name="Relations" id="id-ca52606b1b5f4b83a1956c7225154bb2" type="relations">
+    <element xsi:type="archimate:TriggeringRelationship" id="id-rel-as-t1" source="id-pas1" target="id-pas2"/>
+    <element xsi:type="archimate:TriggeringRelationship" id="id-rel-as-t2" source="id-pas2" target="id-pas3"/>
+    <element xsi:type="archimate:TriggeringRelationship" id="id-rel-as-t3" source="id-pas3" target="id-pas4"/>
+    <element xsi:type="archimate:TriggeringRelationship" id="id-rel-as-t4" source="id-pas4" target="id-pas5"/>
+    <element xsi:type="archimate:RealizationRelationship" id="id-rel-as-rc1" source="id-pas1" target="id-cap1"/>
+    <element xsi:type="archimate:RealizationRelationship" id="id-rel-as-rc2" source="id-pas5" target="id-cap2"/>
+    <element xsi:type="archimate:RealizationRelationship" id="id-rel-as-rc3" source="id-pas4" target="id-cap3"/>
+    <element xsi:type="archimate:RealizationRelationship" id="id-rel-as-rs1" source="id-pas3" target="id-sas1"/>
+    <element xsi:type="archimate:RealizationRelationship" id="id-rel-as-rs2" source="id-pas4" target="id-sas2"/>
+    <element xsi:type="archimate:RealizationRelationship" id="id-rel-as-rs3" source="id-pas4" target="id-sas3"/>
+    <element xsi:type="archimate:RealizationRelationship" id="id-rel-as-rs4" source="id-pas5" target="id-sas4"/>
+    <element xsi:type="archimate:ServingRelationship" id="id-rel-as-u1" source="id-sas1" target="id-a1"/>
+    <element xsi:type="archimate:ServingRelationship" id="id-rel-as-u2" source="id-sas2" target="id-a2"/>
+    <element xsi:type="archimate:ServingRelationship" id="id-rel-as-u3" source="id-sas3" target="id-a3"/>
+    <element xsi:type="archimate:ServingRelationship" id="id-rel-as-u4" source="id-sas4" target="id-a2"/>
+    <element xsi:type="archimate:TriggeringRelationship" id="id-rel-to-t1" source="id-pto1" target="id-pto2"/>
+    <element xsi:type="archimate:TriggeringRelationship" id="id-rel-to-t2" source="id-pto2" target="id-pto3"/>
+    <element xsi:type="archimate:TriggeringRelationship" id="id-rel-to-t3" source="id-pto3" target="id-pto4"/>
+    <element xsi:type="archimate:TriggeringRelationship" id="id-rel-to-t4" source="id-pto4" target="id-pto5"/>
+    <element xsi:type="archimate:TriggeringRelationship" id="id-rel-to-t5" source="id-pto5" target="id-pto6"/>
+    <element xsi:type="archimate:RealizationRelationship" id="id-rel-to-rc1" source="id-pto3" target="id-cap1"/>
+    <element xsi:type="archimate:RealizationRelationship" id="id-rel-to-rc2" source="id-pto4" target="id-cap2"/>
+    <element xsi:type="archimate:RealizationRelationship" id="id-rel-to-rc3" source="id-pto5" target="id-cap3"/>
+    <element xsi:type="archimate:RealizationRelationship" id="id-rel-to-rc4" source="id-pto6" target="id-cap2"/>
+    <element xsi:type="archimate:RealizationRelationship" id="id-rel-to-rs1" source="id-pto5" target="id-sto1"/>
+    <element xsi:type="archimate:RealizationRelationship" id="id-rel-to-rs2" source="id-pto5" target="id-sto2"/>
+    <element xsi:type="archimate:RealizationRelationship" id="id-rel-to-rs3" source="id-pto5" target="id-sto3"/>
+    <element xsi:type="archimate:RealizationRelationship" id="id-rel-to-rs4" source="id-pto6" target="id-sto4"/>
+    <element xsi:type="archimate:ServingRelationship" id="id-rel-to-u1" source="id-sto1" target="id-a1"/>
+    <element xsi:type="archimate:ServingRelationship" id="id-rel-to-u2" source="id-sto2" target="id-a2"/>
+    <element xsi:type="archimate:ServingRelationship" id="id-rel-to-u3" source="id-sto3" target="id-a3"/>
+    <element xsi:type="archimate:ServingRelationship" id="id-rel-to-u4" source="id-sto4" target="id-a2"/>
+  </folder>
+  <folder name="Views" id="id-91e3ef82960245b3a24dc1fb445d65fc" type="diagrams">
+    <element xsi:type="archimate:ArchimateDiagramModel" name="Business Cooperation (AS-IS)" id="id-view-asis">
+      <child xsi:type="archimate:DiagramObject" id="id-n-as-cap1" targetConnections="id-c-as-rc1" archimateElement="id-cap1">
+        <bounds x="36" y="120" width="320" height="80"/>
+      </child>
+      <child xsi:type="archimate:DiagramObject" id="id-n-as-cap2" targetConnections="id-c-as-rc2" archimateElement="id-cap2">
+        <bounds x="1390" y="119" width="320" height="80"/>
+      </child>
+      <child xsi:type="archimate:DiagramObject" id="id-n-as-cap3" targetConnections="id-c-as-rc3" archimateElement="id-cap3">
+        <bounds x="1008" y="119" width="320" height="80"/>
+      </child>
+      <child xsi:type="archimate:DiagramObject" id="id-n-as-p1" archimateElement="id-pas1">
+        <bounds x="60" y="380" width="260" height="80"/>
+        <sourceConnection xsi:type="archimate:Connection" id="id-c-as-t1" source="id-n-as-p1" target="id-n-as-p2" archimateRelationship="id-rel-as-t1"/>
+        <sourceConnection xsi:type="archimate:Connection" id="id-c-as-rc1" source="id-n-as-p1" target="id-n-as-cap1" archimateRelationship="id-rel-as-rc1"/>
+      </child>
+      <child xsi:type="archimate:DiagramObject" id="id-n-as-p2" targetConnections="id-c-as-t1" archimateElement="id-pas2">
+        <bounds x="400" y="380" width="260" height="80"/>
+        <sourceConnection xsi:type="archimate:Connection" id="id-c-as-t2" source="id-n-as-p2" target="id-n-as-p3" archimateRelationship="id-rel-as-t2"/>
+      </child>
+      <child xsi:type="archimate:DiagramObject" id="id-n-as-p3" targetConnections="id-c-as-t2" archimateElement="id-pas3">
+        <bounds x="740" y="380" width="260" height="80"/>
+        <sourceConnection xsi:type="archimate:Connection" id="id-c-as-t3" source="id-n-as-p3" target="id-n-as-p4" archimateRelationship="id-rel-as-t3"/>
+        <sourceConnection xsi:type="archimate:Connection" id="id-c-as-rs1" source="id-n-as-p3" target="id-n-as-s1" archimateRelationship="id-rel-as-rs1"/>
+      </child>
+      <child xsi:type="archimate:DiagramObject" id="id-n-as-p4" targetConnections="id-c-as-t3" archimateElement="id-pas4">
+        <bounds x="1080" y="380" width="260" height="80"/>
+        <sourceConnection xsi:type="archimate:Connection" id="id-c-as-t4" source="id-n-as-p4" target="id-n-as-p5" archimateRelationship="id-rel-as-t4"/>
+        <sourceConnection xsi:type="archimate:Connection" id="id-c-as-rc3" source="id-n-as-p4" target="id-n-as-cap3" archimateRelationship="id-rel-as-rc3"/>
+        <sourceConnection xsi:type="archimate:Connection" id="id-c-as-rs2" source="id-n-as-p4" target="id-n-as-s2" archimateRelationship="id-rel-as-rs2"/>
+        <sourceConnection xsi:type="archimate:Connection" id="id-c-as-rs3" source="id-n-as-p4" target="id-n-as-s3" archimateRelationship="id-rel-as-rs3"/>
+      </child>
+      <child xsi:type="archimate:DiagramObject" id="id-n-as-p5" targetConnections="id-c-as-t4" archimateElement="id-pas5">
+        <bounds x="1420" y="380" width="260" height="80"/>
+        <sourceConnection xsi:type="archimate:Connection" id="id-c-as-rc2" source="id-n-as-p5" target="id-n-as-cap2" archimateRelationship="id-rel-as-rc2"/>
+        <sourceConnection xsi:type="archimate:Connection" id="id-c-as-rs4" source="id-n-as-p5" target="id-n-as-s4" archimateRelationship="id-rel-as-rs4"/>
+      </child>
+      <child xsi:type="archimate:DiagramObject" id="id-n-as-s1" targetConnections="id-c-as-rs1" archimateElement="id-sas1">
+        <bounds x="336" y="660" width="280" height="80"/>
+        <sourceConnection xsi:type="archimate:Connection" id="id-c-as-u1" source="id-n-as-s1" target="id-n-as-a1" archimateRelationship="id-rel-as-u1"/>
+      </child>
+      <child xsi:type="archimate:DiagramObject" id="id-n-as-s2" targetConnections="id-c-as-rs2" archimateElement="id-sas2">
+        <bounds x="720" y="660" width="280" height="80"/>
+        <sourceConnection xsi:type="archimate:Connection" id="id-c-as-u2" source="id-n-as-s2" target="id-n-as-a2" archimateRelationship="id-rel-as-u2"/>
+      </child>
+      <child xsi:type="archimate:DiagramObject" id="id-n-as-s3" targetConnections="id-c-as-rs3" archimateElement="id-sas3">
+        <bounds x="1070" y="660" width="280" height="80"/>
+        <sourceConnection xsi:type="archimate:Connection" id="id-c-as-u3" source="id-n-as-s3" target="id-n-as-a3" archimateRelationship="id-rel-as-u3"/>
+      </child>
+      <child xsi:type="archimate:DiagramObject" id="id-n-as-s4" targetConnections="id-c-as-rs4" archimateElement="id-sas4">
+        <bounds x="1440" y="660" width="280" height="80"/>
+        <sourceConnection xsi:type="archimate:Connection" id="id-c-as-u4" source="id-n-as-s4" target="id-n-as-a2" archimateRelationship="id-rel-as-u4">
+          <bendpoint startX="136" startY="404" endX="836" endY="84"/>
+          <bendpoint startX="-212" startY="404" endX="488" endY="84"/>
+          <bendpoint startX="-548" startY="404" endX="152" endY="84"/>
+        </sourceConnection>
+      </child>
+      <child xsi:type="archimate:DiagramObject" id="id-n-as-a1" targetConnections="id-c-as-u1" archimateElement="id-a1">
+        <bounds x="336" y="979" width="320" height="80"/>
+      </child>
+      <child xsi:type="archimate:DiagramObject" id="id-n-as-a2" targetConnections="id-c-as-u2 id-c-as-u4" archimateElement="id-a2">
+        <bounds x="720" y="980" width="320" height="80"/>
+      </child>
+      <child xsi:type="archimate:DiagramObject" id="id-n-as-a3" targetConnections="id-c-as-u3" archimateElement="id-a3">
+        <bounds x="1101" y="972" width="320" height="80"/>
+      </child>
+    </element>
+    <element xsi:type="archimate:ArchimateDiagramModel" name="Business Cooperation (TO-BE)" id="id-view-tobe">
+      <child xsi:type="archimate:DiagramObject" id="id-n-to-cap1" targetConnections="id-c-to-rc1" archimateElement="id-cap1">
+        <bounds x="80" y="80" width="320" height="80"/>
+      </child>
+      <child xsi:type="archimate:DiagramObject" id="id-n-to-cap2" targetConnections="id-c-to-rc2 id-c-to-rc4" archimateElement="id-cap2">
+        <bounds x="750" y="80" width="320" height="80"/>
+      </child>
+      <child xsi:type="archimate:DiagramObject" id="id-n-to-cap3" targetConnections="id-c-to-rc3" archimateElement="id-cap3">
+        <bounds x="1176" y="80" width="320" height="80"/>
+      </child>
+      <child xsi:type="archimate:DiagramObject" id="id-n-to-p1" archimateElement="id-pto1">
+        <bounds x="40" y="380" width="240" height="80"/>
+        <sourceConnection xsi:type="archimate:Connection" id="id-c-to-t1" source="id-n-to-p1" target="id-n-to-p2" archimateRelationship="id-rel-to-t1"/>
+      </child>
+      <child xsi:type="archimate:DiagramObject" id="id-n-to-p2" targetConnections="id-c-to-t1" archimateElement="id-pto2">
+        <bounds x="320" y="380" width="240" height="80"/>
+        <sourceConnection xsi:type="archimate:Connection" id="id-c-to-t2" source="id-n-to-p2" target="id-n-to-p3" archimateRelationship="id-rel-to-t2"/>
+      </child>
+      <child xsi:type="archimate:DiagramObject" id="id-n-to-p3" targetConnections="id-c-to-t2" archimateElement="id-pto3">
+        <bounds x="600" y="380" width="240" height="80"/>
+        <sourceConnection xsi:type="archimate:Connection" id="id-c-to-t3" source="id-n-to-p3" target="id-n-to-p4" archimateRelationship="id-rel-to-t3"/>
+        <sourceConnection xsi:type="archimate:Connection" id="id-c-to-rc1" source="id-n-to-p3" target="id-n-to-cap1" archimateRelationship="id-rel-to-rc1"/>
+      </child>
+      <child xsi:type="archimate:DiagramObject" id="id-n-to-p4" targetConnections="id-c-to-t3" archimateElement="id-pto4">
+        <bounds x="880" y="380" width="240" height="80"/>
+        <sourceConnection xsi:type="archimate:Connection" id="id-c-to-t4" source="id-n-to-p4" target="id-n-to-p5" archimateRelationship="id-rel-to-t4"/>
+        <sourceConnection xsi:type="archimate:Connection" id="id-c-to-rc2" source="id-n-to-p4" target="id-n-to-cap2" archimateRelationship="id-rel-to-rc2"/>
+      </child>
+      <child xsi:type="archimate:DiagramObject" id="id-n-to-p5" targetConnections="id-c-to-t4" archimateElement="id-pto5">
+        <bounds x="1160" y="380" width="240" height="80"/>
+        <sourceConnection xsi:type="archimate:Connection" id="id-c-to-t5" source="id-n-to-p5" target="id-n-to-p6" archimateRelationship="id-rel-to-t5"/>
+        <sourceConnection xsi:type="archimate:Connection" id="id-c-to-rc3" source="id-n-to-p5" target="id-n-to-cap3" archimateRelationship="id-rel-to-rc3"/>
+        <sourceConnection xsi:type="archimate:Connection" id="id-c-to-rs1" source="id-n-to-p5" target="id-n-to-s1" archimateRelationship="id-rel-to-rs1"/>
+        <sourceConnection xsi:type="archimate:Connection" id="id-c-to-rs2" source="id-n-to-p5" target="id-n-to-s2" archimateRelationship="id-rel-to-rs2"/>
+        <sourceConnection xsi:type="archimate:Connection" id="id-c-to-rs3" source="id-n-to-p5" target="id-n-to-s3" archimateRelationship="id-rel-to-rs3"/>
+      </child>
+      <child xsi:type="archimate:DiagramObject" id="id-n-to-p6" targetConnections="id-c-to-t5" archimateElement="id-pto6">
+        <bounds x="1440" y="380" width="280" height="80"/>
+        <sourceConnection xsi:type="archimate:Connection" id="id-c-to-rc4" source="id-n-to-p6" target="id-n-to-cap2" archimateRelationship="id-rel-to-rc4">
+          <bendpoint startX="4" startY="-372" endX="675" endY="-72"/>
+          <bendpoint startX="-440" startY="-372" endX="231" endY="-72"/>
+          <bendpoint startX="-620" startY="-372" endX="51" endY="-72"/>
+        </sourceConnection>
+        <sourceConnection xsi:type="archimate:Connection" id="id-c-to-rs4" source="id-n-to-p6" target="id-n-to-s4" archimateRelationship="id-rel-to-rs4"/>
+      </child>
+      <child xsi:type="archimate:DiagramObject" id="id-n-to-s1" targetConnections="id-c-to-rs1" archimateElement="id-sto1">
+        <bounds x="120" y="660" width="280" height="80"/>
+        <sourceConnection xsi:type="archimate:Connection" id="id-c-to-u1" source="id-n-to-s1" target="id-n-to-a1" archimateRelationship="id-rel-to-u1"/>
+      </child>
+      <child xsi:type="archimate:DiagramObject" id="id-n-to-s2" targetConnections="id-c-to-rs2" archimateElement="id-sto2">
+        <bounds x="560" y="660" width="280" height="80"/>
+        <sourceConnection xsi:type="archimate:Connection" id="id-c-to-u2" source="id-n-to-s2" target="id-n-to-a2" archimateRelationship="id-rel-to-u2"/>
+      </child>
+      <child xsi:type="archimate:DiagramObject" id="id-n-to-s3" targetConnections="id-c-to-rs3" archimateElement="id-sto3">
+        <bounds x="1000" y="660" width="280" height="80"/>
+        <sourceConnection xsi:type="archimate:Connection" id="id-c-to-u3" source="id-n-to-s3" target="id-n-to-a3" archimateRelationship="id-rel-to-u3"/>
+      </child>
+      <child xsi:type="archimate:DiagramObject" id="id-n-to-s4" targetConnections="id-c-to-rs4" archimateElement="id-sto4">
+        <bounds x="1440" y="660" width="280" height="80"/>
+        <sourceConnection xsi:type="archimate:Connection" id="id-c-to-u4" source="id-n-to-s4" target="id-n-to-a2" archimateRelationship="id-rel-to-u4">
+          <bendpoint startX="-8" startY="392" endX="812" endY="72"/>
+          <bendpoint startX="-332" startY="392" endX="488" endY="72"/>
+          <bendpoint startX="-668" startY="392" endX="152" endY="72"/>
+          <bendpoint startX="-668" startY="380" endX="152" endY="60"/>
+        </sourceConnection>
+      </child>
+      <child xsi:type="archimate:DiagramObject" id="id-n-to-a1" targetConnections="id-c-to-u1" archimateElement="id-a1">
+        <bounds x="100" y="980" width="320" height="80"/>
+      </child>
+      <child xsi:type="archimate:DiagramObject" id="id-n-to-a2" targetConnections="id-c-to-u2 id-c-to-u4" archimateElement="id-a2">
+        <bounds x="600" y="980" width="320" height="80"/>
+      </child>
+      <child xsi:type="archimate:DiagramObject" id="id-n-to-a3" targetConnections="id-c-to-u3" archimateElement="id-a3">
+        <bounds x="1008" y="980" width="320" height="80"/>
+      </child>
+    </element>
+  </folder>
+  <purpose>Модель бизнес-кооперации информационно-аналитической системы (ИАС) для анализа клиентской обратной связи в e-commerce-логистике. Содержит два состояния: AS-IS (ручной процесс) и TO-BE (после внедрения ИАС).</purpose>
+</archimate:model>

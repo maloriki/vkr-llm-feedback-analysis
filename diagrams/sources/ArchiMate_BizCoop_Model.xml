@@ -1,0 +1,313 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ArchiMate 3.x Open Group Exchange File Format
+  Импорт в Archi: File → Import → Open Exchange XML File → выбрать этот файл.
+  После импорта будут две диаграммы (View): AS-IS и TO-BE, плюс редактируемая модель.
+-->
+<model xmlns="http://www.opengroup.org/xsd/archimate/3.0/"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.opengroup.org/xsd/archimate/3.0/ http://www.opengroup.org/xsd/archimate/3.1/archimate3_Diagram.xsd"
+       identifier="id-model-bizcoop">
+
+  <name xml:lang="ru">ИАС — Business Cooperation (ВКР Биксалин)</name>
+  <documentation xml:lang="ru">Модель бизнес-кооперации информационно-аналитической системы (ИАС) для анализа клиентской обратной связи в e-commerce-логистике. Содержит два состояния: AS-IS (ручной процесс) и TO-BE (после внедрения ИАС).</documentation>
+
+  <elements>
+    <!-- ===================== STRATEGY: общие capabilities ===================== -->
+    <element identifier="id-cap1" xsi:type="Capability">
+      <name xml:lang="ru">Аналитика клиентского опыта</name>
+    </element>
+    <element identifier="id-cap2" xsi:type="Capability">
+      <name xml:lang="ru">Раннее выявление операционных инцидентов</name>
+    </element>
+    <element identifier="id-cap3" xsi:type="Capability">
+      <name xml:lang="ru">Управление качеством сервиса доставки</name>
+    </element>
+
+    <!-- ===================== BUSINESS ACTORS: общие ===================== -->
+    <element identifier="id-a1" xsi:type="BusinessActor">
+      <name xml:lang="ru">Менеджер по качеству сервиса</name>
+    </element>
+    <element identifier="id-a2" xsi:type="BusinessActor">
+      <name xml:lang="ru">Руководитель логистики</name>
+    </element>
+    <element identifier="id-a3" xsi:type="BusinessActor">
+      <name xml:lang="ru">Продуктовая команда</name>
+    </element>
+
+    <!-- ===================== AS-IS — Business Processes ===================== -->
+    <element identifier="id-pas1" xsi:type="BusinessProcess">
+      <name xml:lang="ru">Ручное чтение отзывов и чатов</name>
+    </element>
+    <element identifier="id-pas2" xsi:type="BusinessProcess">
+      <name xml:lang="ru">Субъективная категоризация в Excel</name>
+    </element>
+    <element identifier="id-pas3" xsi:type="BusinessProcess">
+      <name xml:lang="ru">Сведение в статичный отчёт</name>
+    </element>
+    <element identifier="id-pas4" xsi:type="BusinessProcess">
+      <name xml:lang="ru">Передача отчёта руководителю</name>
+    </element>
+    <element identifier="id-pas5" xsi:type="BusinessProcess">
+      <name xml:lang="ru">Реактивный отклик на жалобы</name>
+    </element>
+
+    <!-- ===================== AS-IS — Business Services ===================== -->
+    <element identifier="id-sas1" xsi:type="BusinessService">
+      <name xml:lang="ru">Статичный Excel-отчёт</name>
+    </element>
+    <element identifier="id-sas2" xsi:type="BusinessService">
+      <name xml:lang="ru">Эпизодический разбор топ-проблем</name>
+    </element>
+    <element identifier="id-sas3" xsi:type="BusinessService">
+      <name xml:lang="ru">Личные рекомендации руководителя</name>
+    </element>
+    <element identifier="id-sas4" xsi:type="BusinessService">
+      <name xml:lang="ru">Реактивный ответ на жалобу</name>
+    </element>
+
+    <!-- ===================== TO-BE — Business Processes ===================== -->
+    <element identifier="id-pto1" xsi:type="BusinessProcess">
+      <name xml:lang="ru">Сбор обратной связи</name>
+    </element>
+    <element identifier="id-pto2" xsi:type="BusinessProcess">
+      <name xml:lang="ru">Препроцессинг и батчинг</name>
+    </element>
+    <element identifier="id-pto3" xsi:type="BusinessProcess">
+      <name xml:lang="ru">LLM-анализ пакетов (Map)</name>
+    </element>
+    <element identifier="id-pto4" xsi:type="BusinessProcess">
+      <name xml:lang="ru">Агрегация результатов (Reduce)</name>
+    </element>
+    <element identifier="id-pto5" xsi:type="BusinessProcess">
+      <name xml:lang="ru">Формирование аналитического отчёта</name>
+    </element>
+    <element identifier="id-pto6" xsi:type="BusinessProcess">
+      <name xml:lang="ru">Эскалация критических сигналов</name>
+    </element>
+
+    <!-- ===================== TO-BE — Business Services ===================== -->
+    <element identifier="id-sto1" xsi:type="BusinessService">
+      <name xml:lang="ru">Сервис аналитики тональности</name>
+    </element>
+    <element identifier="id-sto2" xsi:type="BusinessService">
+      <name xml:lang="ru">Сервис выявления топ-проблем</name>
+    </element>
+    <element identifier="id-sto3" xsi:type="BusinessService">
+      <name xml:lang="ru">Сервис рекомендаций по улучшению</name>
+    </element>
+    <element identifier="id-sto4" xsi:type="BusinessService">
+      <name xml:lang="ru">Сервис алертинга</name>
+    </element>
+  </elements>
+
+  <relationships>
+    <!-- ===================== AS-IS — triggering между процессами ===================== -->
+    <relationship identifier="id-rel-as-t1" source="id-pas1" target="id-pas2" xsi:type="Triggering"/>
+    <relationship identifier="id-rel-as-t2" source="id-pas2" target="id-pas3" xsi:type="Triggering"/>
+    <relationship identifier="id-rel-as-t3" source="id-pas3" target="id-pas4" xsi:type="Triggering"/>
+    <relationship identifier="id-rel-as-t4" source="id-pas4" target="id-pas5" xsi:type="Triggering"/>
+
+    <!-- AS-IS — realization process → capability -->
+    <relationship identifier="id-rel-as-rc1" source="id-pas1" target="id-cap1" xsi:type="Realization"/>
+    <relationship identifier="id-rel-as-rc2" source="id-pas5" target="id-cap2" xsi:type="Realization"/>
+    <relationship identifier="id-rel-as-rc3" source="id-pas4" target="id-cap3" xsi:type="Realization"/>
+
+    <!-- AS-IS — realization process → service -->
+    <relationship identifier="id-rel-as-rs1" source="id-pas3" target="id-sas1" xsi:type="Realization"/>
+    <relationship identifier="id-rel-as-rs2" source="id-pas4" target="id-sas2" xsi:type="Realization"/>
+    <relationship identifier="id-rel-as-rs3" source="id-pas4" target="id-sas3" xsi:type="Realization"/>
+    <relationship identifier="id-rel-as-rs4" source="id-pas5" target="id-sas4" xsi:type="Realization"/>
+
+    <!-- AS-IS — serving service → actor -->
+    <relationship identifier="id-rel-as-u1" source="id-sas1" target="id-a1" xsi:type="Serving"/>
+    <relationship identifier="id-rel-as-u2" source="id-sas2" target="id-a2" xsi:type="Serving"/>
+    <relationship identifier="id-rel-as-u3" source="id-sas3" target="id-a3" xsi:type="Serving"/>
+    <relationship identifier="id-rel-as-u4" source="id-sas4" target="id-a2" xsi:type="Serving"/>
+
+    <!-- ===================== TO-BE — triggering между процессами ===================== -->
+    <relationship identifier="id-rel-to-t1" source="id-pto1" target="id-pto2" xsi:type="Triggering"/>
+    <relationship identifier="id-rel-to-t2" source="id-pto2" target="id-pto3" xsi:type="Triggering"/>
+    <relationship identifier="id-rel-to-t3" source="id-pto3" target="id-pto4" xsi:type="Triggering"/>
+    <relationship identifier="id-rel-to-t4" source="id-pto4" target="id-pto5" xsi:type="Triggering"/>
+    <relationship identifier="id-rel-to-t5" source="id-pto5" target="id-pto6" xsi:type="Triggering"/>
+
+    <!-- TO-BE — realization process → capability -->
+    <relationship identifier="id-rel-to-rc1" source="id-pto3" target="id-cap1" xsi:type="Realization"/>
+    <relationship identifier="id-rel-to-rc2" source="id-pto4" target="id-cap2" xsi:type="Realization"/>
+    <relationship identifier="id-rel-to-rc3" source="id-pto5" target="id-cap3" xsi:type="Realization"/>
+    <relationship identifier="id-rel-to-rc4" source="id-pto6" target="id-cap2" xsi:type="Realization"/>
+
+    <!-- TO-BE — realization process → service -->
+    <relationship identifier="id-rel-to-rs1" source="id-pto5" target="id-sto1" xsi:type="Realization"/>
+    <relationship identifier="id-rel-to-rs2" source="id-pto5" target="id-sto2" xsi:type="Realization"/>
+    <relationship identifier="id-rel-to-rs3" source="id-pto5" target="id-sto3" xsi:type="Realization"/>
+    <relationship identifier="id-rel-to-rs4" source="id-pto6" target="id-sto4" xsi:type="Realization"/>
+
+    <!-- TO-BE — serving service → actor -->
+    <relationship identifier="id-rel-to-u1" source="id-sto1" target="id-a1" xsi:type="Serving"/>
+    <relationship identifier="id-rel-to-u2" source="id-sto2" target="id-a2" xsi:type="Serving"/>
+    <relationship identifier="id-rel-to-u3" source="id-sto3" target="id-a3" xsi:type="Serving"/>
+    <relationship identifier="id-rel-to-u4" source="id-sto4" target="id-a2" xsi:type="Serving"/>
+  </relationships>
+
+  <organizations>
+    <item>
+      <label xml:lang="ru">Strategy</label>
+      <item identifierRef="id-cap1"/>
+      <item identifierRef="id-cap2"/>
+      <item identifierRef="id-cap3"/>
+    </item>
+    <item>
+      <label xml:lang="ru">Business — AS-IS</label>
+      <item identifierRef="id-pas1"/>
+      <item identifierRef="id-pas2"/>
+      <item identifierRef="id-pas3"/>
+      <item identifierRef="id-pas4"/>
+      <item identifierRef="id-pas5"/>
+      <item identifierRef="id-sas1"/>
+      <item identifierRef="id-sas2"/>
+      <item identifierRef="id-sas3"/>
+      <item identifierRef="id-sas4"/>
+    </item>
+    <item>
+      <label xml:lang="ru">Business — TO-BE</label>
+      <item identifierRef="id-pto1"/>
+      <item identifierRef="id-pto2"/>
+      <item identifierRef="id-pto3"/>
+      <item identifierRef="id-pto4"/>
+      <item identifierRef="id-pto5"/>
+      <item identifierRef="id-pto6"/>
+      <item identifierRef="id-sto1"/>
+      <item identifierRef="id-sto2"/>
+      <item identifierRef="id-sto3"/>
+      <item identifierRef="id-sto4"/>
+    </item>
+    <item>
+      <label xml:lang="ru">Business — Actors</label>
+      <item identifierRef="id-a1"/>
+      <item identifierRef="id-a2"/>
+      <item identifierRef="id-a3"/>
+    </item>
+    <item>
+      <label xml:lang="ru">Views</label>
+      <item identifierRef="id-view-asis"/>
+      <item identifierRef="id-view-tobe"/>
+    </item>
+  </organizations>
+
+  <views>
+    <diagrams>
+
+      <!-- ============================================================== -->
+      <!-- ============== VIEW: BUSINESS COOPERATION AS-IS ============== -->
+      <!-- ============================================================== -->
+      <view identifier="id-view-asis" xsi:type="Diagram">
+        <name xml:lang="ru">Business Cooperation (AS-IS)</name>
+
+        <!-- Capabilities -->
+        <node identifier="id-n-as-cap1" xsi:type="Element" elementRef="id-cap1" x="80"   y="80" w="320" h="80"/>
+        <node identifier="id-n-as-cap2" xsi:type="Element" elementRef="id-cap2" x="750"  y="80" w="320" h="80"/>
+        <node identifier="id-n-as-cap3" xsi:type="Element" elementRef="id-cap3" x="1420" y="80" w="320" h="80"/>
+
+        <!-- Processes -->
+        <node identifier="id-n-as-p1" xsi:type="Element" elementRef="id-pas1" x="60"   y="380" w="260" h="80"/>
+        <node identifier="id-n-as-p2" xsi:type="Element" elementRef="id-pas2" x="400"  y="380" w="260" h="80"/>
+        <node identifier="id-n-as-p3" xsi:type="Element" elementRef="id-pas3" x="740"  y="380" w="260" h="80"/>
+        <node identifier="id-n-as-p4" xsi:type="Element" elementRef="id-pas4" x="1080" y="380" w="260" h="80"/>
+        <node identifier="id-n-as-p5" xsi:type="Element" elementRef="id-pas5" x="1420" y="380" w="260" h="80"/>
+
+        <!-- Services -->
+        <node identifier="id-n-as-s1" xsi:type="Element" elementRef="id-sas1" x="120"  y="660" w="280" h="80"/>
+        <node identifier="id-n-as-s2" xsi:type="Element" elementRef="id-sas2" x="560"  y="660" w="280" h="80"/>
+        <node identifier="id-n-as-s3" xsi:type="Element" elementRef="id-sas3" x="1000" y="660" w="280" h="80"/>
+        <node identifier="id-n-as-s4" xsi:type="Element" elementRef="id-sas4" x="1440" y="660" w="280" h="80"/>
+
+        <!-- Actors -->
+        <node identifier="id-n-as-a1" xsi:type="Element" elementRef="id-a1" x="200"  y="980" w="320" h="80"/>
+        <node identifier="id-n-as-a2" xsi:type="Element" elementRef="id-a2" x="840"  y="980" w="320" h="80"/>
+        <node identifier="id-n-as-a3" xsi:type="Element" elementRef="id-a3" x="1480" y="980" w="320" h="80"/>
+
+        <!-- Connections — triggering -->
+        <connection identifier="id-c-as-t1" xsi:type="Relationship" relationshipRef="id-rel-as-t1" source="id-n-as-p1" target="id-n-as-p2"/>
+        <connection identifier="id-c-as-t2" xsi:type="Relationship" relationshipRef="id-rel-as-t2" source="id-n-as-p2" target="id-n-as-p3"/>
+        <connection identifier="id-c-as-t3" xsi:type="Relationship" relationshipRef="id-rel-as-t3" source="id-n-as-p3" target="id-n-as-p4"/>
+        <connection identifier="id-c-as-t4" xsi:type="Relationship" relationshipRef="id-rel-as-t4" source="id-n-as-p4" target="id-n-as-p5"/>
+
+        <!-- Connections — realization → capability -->
+        <connection identifier="id-c-as-rc1" xsi:type="Relationship" relationshipRef="id-rel-as-rc1" source="id-n-as-p1" target="id-n-as-cap1"/>
+        <connection identifier="id-c-as-rc2" xsi:type="Relationship" relationshipRef="id-rel-as-rc2" source="id-n-as-p5" target="id-n-as-cap2"/>
+        <connection identifier="id-c-as-rc3" xsi:type="Relationship" relationshipRef="id-rel-as-rc3" source="id-n-as-p4" target="id-n-as-cap3"/>
+
+        <!-- Connections — realization → service -->
+        <connection identifier="id-c-as-rs1" xsi:type="Relationship" relationshipRef="id-rel-as-rs1" source="id-n-as-p3" target="id-n-as-s1"/>
+        <connection identifier="id-c-as-rs2" xsi:type="Relationship" relationshipRef="id-rel-as-rs2" source="id-n-as-p4" target="id-n-as-s2"/>
+        <connection identifier="id-c-as-rs3" xsi:type="Relationship" relationshipRef="id-rel-as-rs3" source="id-n-as-p4" target="id-n-as-s3"/>
+        <connection identifier="id-c-as-rs4" xsi:type="Relationship" relationshipRef="id-rel-as-rs4" source="id-n-as-p5" target="id-n-as-s4"/>
+
+        <!-- Connections — serving -->
+        <connection identifier="id-c-as-u1" xsi:type="Relationship" relationshipRef="id-rel-as-u1" source="id-n-as-s1" target="id-n-as-a1"/>
+        <connection identifier="id-c-as-u2" xsi:type="Relationship" relationshipRef="id-rel-as-u2" source="id-n-as-s2" target="id-n-as-a2"/>
+        <connection identifier="id-c-as-u3" xsi:type="Relationship" relationshipRef="id-rel-as-u3" source="id-n-as-s3" target="id-n-as-a3"/>
+        <connection identifier="id-c-as-u4" xsi:type="Relationship" relationshipRef="id-rel-as-u4" source="id-n-as-s4" target="id-n-as-a2"/>
+      </view>
+
+      <!-- ============================================================== -->
+      <!-- ============== VIEW: BUSINESS COOPERATION TO-BE ============== -->
+      <!-- ============================================================== -->
+      <view identifier="id-view-tobe" xsi:type="Diagram">
+        <name xml:lang="ru">Business Cooperation (TO-BE)</name>
+
+        <!-- Capabilities -->
+        <node identifier="id-n-to-cap1" xsi:type="Element" elementRef="id-cap1" x="80"   y="80" w="320" h="80"/>
+        <node identifier="id-n-to-cap2" xsi:type="Element" elementRef="id-cap2" x="750"  y="80" w="320" h="80"/>
+        <node identifier="id-n-to-cap3" xsi:type="Element" elementRef="id-cap3" x="1420" y="80" w="320" h="80"/>
+
+        <!-- Processes (6 шт) -->
+        <node identifier="id-n-to-p1" xsi:type="Element" elementRef="id-pto1" x="40"   y="380" w="240" h="80"/>
+        <node identifier="id-n-to-p2" xsi:type="Element" elementRef="id-pto2" x="320"  y="380" w="240" h="80"/>
+        <node identifier="id-n-to-p3" xsi:type="Element" elementRef="id-pto3" x="600"  y="380" w="240" h="80"/>
+        <node identifier="id-n-to-p4" xsi:type="Element" elementRef="id-pto4" x="880"  y="380" w="240" h="80"/>
+        <node identifier="id-n-to-p5" xsi:type="Element" elementRef="id-pto5" x="1160" y="380" w="240" h="80"/>
+        <node identifier="id-n-to-p6" xsi:type="Element" elementRef="id-pto6" x="1440" y="380" w="280" h="80"/>
+
+        <!-- Services -->
+        <node identifier="id-n-to-s1" xsi:type="Element" elementRef="id-sto1" x="120"  y="660" w="280" h="80"/>
+        <node identifier="id-n-to-s2" xsi:type="Element" elementRef="id-sto2" x="560"  y="660" w="280" h="80"/>
+        <node identifier="id-n-to-s3" xsi:type="Element" elementRef="id-sto3" x="1000" y="660" w="280" h="80"/>
+        <node identifier="id-n-to-s4" xsi:type="Element" elementRef="id-sto4" x="1440" y="660" w="280" h="80"/>
+
+        <!-- Actors -->
+        <node identifier="id-n-to-a1" xsi:type="Element" elementRef="id-a1" x="200"  y="980" w="320" h="80"/>
+        <node identifier="id-n-to-a2" xsi:type="Element" elementRef="id-a2" x="840"  y="980" w="320" h="80"/>
+        <node identifier="id-n-to-a3" xsi:type="Element" elementRef="id-a3" x="1480" y="980" w="320" h="80"/>
+
+        <!-- Connections — triggering -->
+        <connection identifier="id-c-to-t1" xsi:type="Relationship" relationshipRef="id-rel-to-t1" source="id-n-to-p1" target="id-n-to-p2"/>
+        <connection identifier="id-c-to-t2" xsi:type="Relationship" relationshipRef="id-rel-to-t2" source="id-n-to-p2" target="id-n-to-p3"/>
+        <connection identifier="id-c-to-t3" xsi:type="Relationship" relationshipRef="id-rel-to-t3" source="id-n-to-p3" target="id-n-to-p4"/>
+        <connection identifier="id-c-to-t4" xsi:type="Relationship" relationshipRef="id-rel-to-t4" source="id-n-to-p4" target="id-n-to-p5"/>
+        <connection identifier="id-c-to-t5" xsi:type="Relationship" relationshipRef="id-rel-to-t5" source="id-n-to-p5" target="id-n-to-p6"/>
+
+        <!-- Connections — realization → capability -->
+        <connection identifier="id-c-to-rc1" xsi:type="Relationship" relationshipRef="id-rel-to-rc1" source="id-n-to-p3" target="id-n-to-cap1"/>
+        <connection identifier="id-c-to-rc2" xsi:type="Relationship" relationshipRef="id-rel-to-rc2" source="id-n-to-p4" target="id-n-to-cap2"/>
+        <connection identifier="id-c-to-rc3" xsi:type="Relationship" relationshipRef="id-rel-to-rc3" source="id-n-to-p5" target="id-n-to-cap3"/>
+        <connection identifier="id-c-to-rc4" xsi:type="Relationship" relationshipRef="id-rel-to-rc4" source="id-n-to-p6" target="id-n-to-cap2"/>
+
+        <!-- Connections — realization → service -->
+        <connection identifier="id-c-to-rs1" xsi:type="Relationship" relationshipRef="id-rel-to-rs1" source="id-n-to-p5" target="id-n-to-s1"/>
+        <connection identifier="id-c-to-rs2" xsi:type="Relationship" relationshipRef="id-rel-to-rs2" source="id-n-to-p5" target="id-n-to-s2"/>
+        <connection identifier="id-c-to-rs3" xsi:type="Relationship" relationshipRef="id-rel-to-rs3" source="id-n-to-p5" target="id-n-to-s3"/>
+        <connection identifier="id-c-to-rs4" xsi:type="Relationship" relationshipRef="id-rel-to-rs4" source="id-n-to-p6" target="id-n-to-s4"/>
+
+        <!-- Connections — serving -->
+        <connection identifier="id-c-to-u1" xsi:type="Relationship" relationshipRef="id-rel-to-u1" source="id-n-to-s1" target="id-n-to-a1"/>
+        <connection identifier="id-c-to-u2" xsi:type="Relationship" relationshipRef="id-rel-to-u2" source="id-n-to-s2" target="id-n-to-a2"/>
+        <connection identifier="id-c-to-u3" xsi:type="Relationship" relationshipRef="id-rel-to-u3" source="id-n-to-s3" target="id-n-to-a3"/>
+        <connection identifier="id-c-to-u4" xsi:type="Relationship" relationshipRef="id-rel-to-u4" source="id-n-to-s4" target="id-n-to-a2"/>
+      </view>
+
+    </diagrams>
+  </views>
+</model>

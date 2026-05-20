@@ -1,0 +1,137 @@
+@startuml Fig9_ER_Diagram
+
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam linetype ortho
+skinparam nodesep 90
+skinparam ranksep 140
+skinparam defaultTextAlignment center
+
+skinparam class {
+    BackgroundColor #F5F8FF
+    BorderColor #8FAACC
+    ArrowColor #707070
+    ArrowFontColor #555555
+    ArrowFontSize 12
+    FontColor #333333
+    HeaderBackgroundColor #438DD5
+    HeaderFontColor #FFFFFF
+}
+
+' --- Сущности ------------------------------------------------------------
+
+' Источники данных — группа сверху-слева
+together {
+    entity "raw_reviews" as reviews {
+        *id : SERIAL <<PK>>
+        --
+        text : TEXT
+        rating : INT (1..5)
+        order_id : VARCHAR
+        review_date : TIMESTAMP
+        source_type : VARCHAR = 'oms'
+        created_at : TIMESTAMP
+    }
+
+    entity "raw_messages" as messages {
+        *id : SERIAL <<PK>>
+        --
+        text : TEXT
+        chat_id : BIGINT
+        sender_name : VARCHAR
+        message_date : TIMESTAMP
+        source_type : VARCHAR = 'tg'
+        created_at : TIMESTAMP
+    }
+}
+
+' Конфигурация моделей — отдельно сверху-справа
+entity "models_config" as models {
+    *id : SERIAL <<PK>>
+    --
+    model_name : VARCHAR
+    provider : VARCHAR
+    context_window : INT
+    endpoint_url : VARCHAR
+    is_active : BOOLEAN
+}
+
+' Центральная обработка
+entity "batches" as batches {
+    *id : SERIAL <<PK>>
+    --
+    source_type : VARCHAR
+    batch_number : INT
+    model_name : VARCHAR
+    item_count : INT
+    status : ENUM
+    created_at : TIMESTAMP
+}
+
+entity "analysis_items" as items {
+    *id : SERIAL <<PK>>
+    --
+    source_id : INT <<FK>>
+    source_type : VARCHAR
+    batch_id : INT <<FK>>
+    sentiment : ENUM(pos/neg/neu)
+    sentiment_score : FLOAT
+    topics : JSONB
+    key_phrases : JSONB
+    model_name : VARCHAR
+    created_at : TIMESTAMP
+}
+
+entity "batch_summaries" as summaries {
+    *id : SERIAL <<PK>>
+    --
+    batch_id : INT <<FK>>
+    summary_text : TEXT
+    topics_agg : JSONB
+    sentiment_dist : JSONB
+    insights : JSONB
+    raw_llm_response : TEXT
+    created_at : TIMESTAMP
+}
+
+' Результаты — снизу-справа
+together {
+    entity "reports" as reports {
+        *id : SERIAL <<PK>>
+        --
+        period_start : DATE
+        period_end : DATE
+        source_type : VARCHAR
+        summary : TEXT
+        top_problems : JSONB
+        recommendations : JSONB
+        model_name : VARCHAR
+        created_at : TIMESTAMP
+    }
+
+    entity "alerts" as alerts {
+        *id : SERIAL <<PK>>
+        --
+        report_id : INT <<FK>>
+        alert_type : VARCHAR
+        severity : ENUM
+        message : TEXT
+        is_acknowledged : BOOLEAN
+        created_at : TIMESTAMP
+    }
+}
+
+' --- Связи ---------------------------------------------------------------
+
+' Hidden layout hint: разместить items прямо под raw_reviews
+reviews -[hidden]down- items
+
+reviews   ||--o{ items     : "1 : N\nsource_id"
+messages  ||--o{ items     : "1 : N\nsource_id"
+batches   ||--o{ items     : "1 : N"
+batches   ||--|| summaries : "1 : 1"
+summaries }o--|| reports   : "N : 1"
+reports   ||--o{ alerts    : "1 : N"
+models    ||--o{ batches   : "1 : N\nmodel_name"
+
+@enduml

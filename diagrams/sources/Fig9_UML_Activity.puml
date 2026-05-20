@@ -1,0 +1,63 @@
+@startuml Fig8_UML_Activity
+
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam ArrowColor #333333
+skinparam ActivityBorderColor #6C8EBF
+skinparam ActivityBackgroundColor #DAE8FC
+skinparam ActivityDiamondBorderColor #D6B656
+skinparam ActivityDiamondBackgroundColor #FFF2CC
+skinparam NoteBorderColor #CCCCCC
+skinparam NoteBackgroundColor #F5F5F5
+
+|#FAFAFA|ПОДГОТОВКА|
+start
+:Получение данных из Data Lake\n(отзывы OMS + сообщения Telegram);
+
+:Предобработка текста\n(очистка, нормализация, дедупликация);
+note right
+  Удаление HTML, emoji,
+  нормализация пробелов
+end note
+
+|#F5F8FF|BATCHING|
+:Автоматический подбор размера пакета (auto-batching)\nна основе контекстного окна модели;
+note right
+  batch_size = floor(context_window
+    × fill_ratio / avg_token_count)
+end note
+
+|#F5F0FA|MAP-ФАЗА|
+repeat
+  :Формирование промпта\n(системная инструкция + данные пакета);
+  :Отправка запроса к LLM-модели;
+  note right
+    DeepSeek / Qwen 2.5 /
+    YandexGPT / GPT-3.5
+  end note
+  :Парсинг ответа LLM\n(тональность, темы, инсайты, резюме);
+  :Сохранение промежуточных результатов;
+repeat while (есть ещё пакеты?) is (да) not (нет)
+
+|#FFF8F0|REDUCE-ФАЗА|
+:Агрегация результатов (Reduce):\nсинтез промежуточных анализов в итоговый отчёт;
+:Формирование итогового отчёта\n(тренды, топ проблем, рекомендации);
+:Сохранение в аналитическую БД;
+
+|#F5F8FF|ДОСТАВКА|
+if (обнаружены критические сигналы?) then (да)
+  :Отправка алерта\n(email, мессенджер);
+else (нет)
+endif
+
+:Обновление дашборда;
+
+fork
+  :Данные доступны\nчерез REST API;
+fork again
+  :Отчёт доступен\nв дашборде;
+end fork
+
+stop
+
+@enduml

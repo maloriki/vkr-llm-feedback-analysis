@@ -1,0 +1,181 @@
+<mxfile host="app.diagrams.net" agent="vkr-archimate" version="22.0.0">
+  <diagram name="Fig4_BizCoop_TOBE" id="d1">
+    <mxGraphModel dx="1500" dy="900" grid="1" gridSize="10" guides="1" tooltips="1"
+                  connect="1" arrows="1" fold="1" page="1" pageScale="1"
+                  pageWidth="2000" pageHeight="1200"
+                  math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- ===================== CAPABILITIES (Strategy) ===================== -->
+        <mxCell id="cap1" value="Аналитика клиентского опыта"
+                style="shape=mxgraph.archimate3.strategy;archiType=rounded;stratType=capability;fillColor=#F5DEFF;strokeColor=#B5739D;fontColor=#000000;fontSize=13;whiteSpace=wrap;html=1;"
+                vertex="1" parent="1">
+          <mxGeometry x="200" y="80" width="320" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="cap2" value="Раннее выявление операционных инцидентов"
+                style="shape=mxgraph.archimate3.strategy;archiType=rounded;stratType=capability;fillColor=#F5DEFF;strokeColor=#B5739D;fontColor=#000000;fontSize=13;whiteSpace=wrap;html=1;"
+                vertex="1" parent="1">
+          <mxGeometry x="840" y="80" width="320" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="cap3" value="Управление качеством сервиса доставки"
+                style="shape=mxgraph.archimate3.strategy;archiType=rounded;stratType=capability;fillColor=#F5DEFF;strokeColor=#B5739D;fontColor=#000000;fontSize=13;whiteSpace=wrap;html=1;"
+                vertex="1" parent="1">
+          <mxGeometry x="1480" y="80" width="320" height="80" as="geometry"/>
+        </mxCell>
+
+        <!-- ===================== BUSINESS PROCESSES ===================== -->
+        <mxCell id="p1" value="Сбор обратной связи"
+                style="shape=mxgraph.archimate3.business;archiType=square;bizType=process;fillColor=#FFFFB1;strokeColor=#B89B5E;fontColor=#000000;fontSize=12;whiteSpace=wrap;html=1;"
+                vertex="1" parent="1">
+          <mxGeometry x="60" y="360" width="240" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="p2" value="Препроцессинг и батчинг"
+                style="shape=mxgraph.archimate3.business;archiType=square;bizType=process;fillColor=#FFFFB1;strokeColor=#B89B5E;fontColor=#000000;fontSize=12;whiteSpace=wrap;html=1;"
+                vertex="1" parent="1">
+          <mxGeometry x="380" y="360" width="240" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="p3" value="LLM-анализ пакетов (Map)"
+                style="shape=mxgraph.archimate3.business;archiType=square;bizType=process;fillColor=#FFFFB1;strokeColor=#B89B5E;fontColor=#000000;fontSize=12;whiteSpace=wrap;html=1;"
+                vertex="1" parent="1">
+          <mxGeometry x="700" y="360" width="240" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="p4" value="Агрегация результатов (Reduce)"
+                style="shape=mxgraph.archimate3.business;archiType=square;bizType=process;fillColor=#FFFFB1;strokeColor=#B89B5E;fontColor=#000000;fontSize=12;whiteSpace=wrap;html=1;"
+                vertex="1" parent="1">
+          <mxGeometry x="1020" y="360" width="240" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="p5" value="Формирование аналитического отчёта"
+                style="shape=mxgraph.archimate3.business;archiType=square;bizType=process;fillColor=#FFFFB1;strokeColor=#B89B5E;fontColor=#000000;fontSize=12;whiteSpace=wrap;html=1;"
+                vertex="1" parent="1">
+          <mxGeometry x="1340" y="360" width="240" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="p6" value="Эскалация критических сигналов"
+                style="shape=mxgraph.archimate3.business;archiType=square;bizType=process;fillColor=#FFFFB1;strokeColor=#B89B5E;fontColor=#000000;fontSize=12;whiteSpace=wrap;html=1;"
+                vertex="1" parent="1">
+          <mxGeometry x="1660" y="360" width="240" height="80" as="geometry"/>
+        </mxCell>
+
+        <!-- ===================== BUSINESS SERVICES ===================== -->
+        <mxCell id="s1" value="Сервис аналитики тональности"
+                style="shape=mxgraph.archimate3.business;archiType=rounded;bizType=service;fillColor=#FFFFB1;strokeColor=#B89B5E;fontColor=#000000;fontSize=12;whiteSpace=wrap;html=1;"
+                vertex="1" parent="1">
+          <mxGeometry x="120" y="660" width="280" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="s2" value="Сервис выявления топ-проблем"
+                style="shape=mxgraph.archimate3.business;archiType=rounded;bizType=service;fillColor=#FFFFB1;strokeColor=#B89B5E;fontColor=#000000;fontSize=12;whiteSpace=wrap;html=1;"
+                vertex="1" parent="1">
+          <mxGeometry x="560" y="660" width="280" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="s3" value="Сервис рекомендаций"
+                style="shape=mxgraph.archimate3.business;archiType=rounded;bizType=service;fillColor=#FFFFB1;strokeColor=#B89B5E;fontColor=#000000;fontSize=12;whiteSpace=wrap;html=1;"
+                vertex="1" parent="1">
+          <mxGeometry x="1000" y="660" width="280" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="s4" value="Сервис алертинга"
+                style="shape=mxgraph.archimate3.business;archiType=rounded;bizType=service;fillColor=#FFFFB1;strokeColor=#B89B5E;fontColor=#000000;fontSize=12;whiteSpace=wrap;html=1;"
+                vertex="1" parent="1">
+          <mxGeometry x="1440" y="660" width="280" height="80" as="geometry"/>
+        </mxCell>
+
+        <!-- ===================== BUSINESS ACTORS ===================== -->
+        <mxCell id="a1" value="Менеджер по качеству сервиса"
+                style="shape=mxgraph.archimate3.business;archiType=square;bizType=actor;fillColor=#FFFFB1;strokeColor=#B89B5E;fontColor=#000000;fontSize=13;whiteSpace=wrap;html=1;"
+                vertex="1" parent="1">
+          <mxGeometry x="200" y="980" width="320" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="a2" value="Руководитель логистики"
+                style="shape=mxgraph.archimate3.business;archiType=square;bizType=actor;fillColor=#FFFFB1;strokeColor=#B89B5E;fontColor=#000000;fontSize=13;whiteSpace=wrap;html=1;"
+                vertex="1" parent="1">
+          <mxGeometry x="840" y="980" width="320" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="a3" value="Продуктовая команда"
+                style="shape=mxgraph.archimate3.business;archiType=square;bizType=actor;fillColor=#FFFFB1;strokeColor=#B89B5E;fontColor=#000000;fontSize=13;whiteSpace=wrap;html=1;"
+                vertex="1" parent="1">
+          <mxGeometry x="1480" y="980" width="320" height="80" as="geometry"/>
+        </mxCell>
+
+        <!-- ===================== TRIGGERING (process → process) ===================== -->
+        <!-- triggering = solid line + закрашенная стрелка -->
+        <mxCell id="t1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;endArrow=block;endFill=1;strokeColor=#444444;"
+                edge="1" source="p1" target="p2" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="t2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;endArrow=block;endFill=1;strokeColor=#444444;"
+                edge="1" source="p2" target="p3" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="t3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;endArrow=block;endFill=1;strokeColor=#444444;"
+                edge="1" source="p3" target="p4" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="t4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;endArrow=block;endFill=1;strokeColor=#444444;"
+                edge="1" source="p4" target="p5" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="t5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0;entryY=0.5;endArrow=block;endFill=1;strokeColor=#444444;"
+                edge="1" source="p5" target="p6" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- ===================== REALIZATION (process → capability) ===================== -->
+        <!-- realization = пунктир + пустой треугольник -->
+        <mxCell id="r1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=0;entryX=0.5;entryY=1;endArrow=block;endFill=0;dashed=1;dashPattern=8 4;strokeColor=#444444;"
+                edge="1" source="p3" target="cap1" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="r2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=0;entryX=0.5;entryY=1;endArrow=block;endFill=0;dashed=1;dashPattern=8 4;strokeColor=#444444;"
+                edge="1" source="p4" target="cap2" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="r3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=0;entryX=0.5;entryY=1;endArrow=block;endFill=0;dashed=1;dashPattern=8 4;strokeColor=#444444;"
+                edge="1" source="p5" target="cap3" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="r4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=0;entryX=0.5;entryY=1;endArrow=block;endFill=0;dashed=1;dashPattern=8 4;strokeColor=#444444;"
+                edge="1" source="p6" target="cap2" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- ===================== REALIZATION (process → service) ===================== -->
+        <mxCell id="rs1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;endArrow=block;endFill=0;dashed=1;dashPattern=8 4;strokeColor=#444444;"
+                edge="1" source="p5" target="s1" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="rs2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;endArrow=block;endFill=0;dashed=1;dashPattern=8 4;strokeColor=#444444;"
+                edge="1" source="p5" target="s2" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="rs3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;endArrow=block;endFill=0;dashed=1;dashPattern=8 4;strokeColor=#444444;"
+                edge="1" source="p5" target="s3" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="rs4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;endArrow=block;endFill=0;dashed=1;dashPattern=8 4;strokeColor=#444444;"
+                edge="1" source="p6" target="s4" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- ===================== SERVING (service → actor) ===================== -->
+        <!-- serving = solid line + пустой треугольник -->
+        <mxCell id="u1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;endArrow=block;endFill=0;strokeColor=#444444;"
+                edge="1" source="s1" target="a1" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="u2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;endArrow=block;endFill=0;strokeColor=#444444;"
+                edge="1" source="s2" target="a2" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="u3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;endArrow=block;endFill=0;strokeColor=#444444;"
+                edge="1" source="s3" target="a3" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="u4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;endArrow=block;endFill=0;strokeColor=#444444;"
+                edge="1" source="s4" target="a2" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

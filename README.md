@@ -1,127 +1,103 @@
-# ИАС Анализа Обратной Связи на основе LLM
+# vkr-llm-feedback-analysis
 
-**Выпускная квалификационная работа (ВКР)** — НИУ ВШЭ, Высшая Школа Бизнеса
-Направление: Бизнес-информатика
-Тема: Автоматизация бизнес-процессов промышленной компании с использованием больших языковых моделей
+**ВКР Биксалина Артёма Ильнуровича** | НИУ ВШЭ, Высшая школа бизнеса, ББИ-221, 2026
 
-## Описание
+Информационно-аналитическая система (ИАС) для автоматизированного мульти-источникового анализа обратной связи в логистической e-commerce компании на основе больших языковых моделей.
 
-Информационно-аналитическая система для автоматизации анализа клиентской обратной связи и внутренних коммуникаций курьеров на основе больших языковых моделей (LLM).
-
-**Ключевые особенности:**
-- Мульти-источниковый сбор данных (OMS API + Telegram Bot)
-- LLM-конвейер с паттерном MapReduce и auto-batching
-- Поддержка self-hosted моделей (Qwen 2.5, DeepSeek) и облачных API (YandexGPT)
-- Автоматическая генерация аналитических инсайтов с цитатами и рекомендациями
-- Интерактивный дашборд (Streamlit) и Telegram-бот
-
-## Результаты эксперимента
-
-Сравнение 6 моделей на 500 клиентских отзывах (датасет RuReviews):
-
-| Модель | Тип | Accuracy | Macro F1 |
-|--------|-----|:---:|:---:|
-| TF-IDF + XGBoost | Обученная (89.5K) | **0.744** | **0.747** |
-| YandexGPT Embeddings + LogReg | Обученная (300) | 0.675 | 0.676 |
-| YandexGPT Pro | Zero-shot, cloud | 0.674 | 0.652 |
-| Qwen 2.5 7B | Zero-shot, self-hosted | 0.656 | 0.634 |
-| DeepSeek LLM 7B | Zero-shot, self-hosted | 0.646 | 0.640 |
-| DeepSeek R1 7B | Reasoning, self-hosted | 0.480 | 0.496 |
-
-## Структура проекта
+## Структура репозитория
 
 ```
-├── 01_baseline_tfidf.py      # TF-IDF + XGBoost baseline
-├── 02_llm_pipeline.py         # Универсальный пайплайн для Ollama
-├── 05_yandexgpt.py            # YandexGPT Pro эксперимент
-├── 06_yandex_classifier.py    # YandexGPT Classifier + Embeddings
-├── prompts.py                 # Системные промпты (4 шт)
-├── dashboard.py               # Streamlit дашборд
-├── telegram_bot.py            # Telegram-бот для демо
-├── results_*.json             # Метрики экспериментов
-├── predictions_*.csv          # Предсказания моделей
-└── test_set_500.csv           # Тестовая выборка (500 отзывов)
+.
+├── vkr_thesis/             # текст ВКР: PDF, аннотации
+├── diagrams/               # все 12 диаграмм из ВКР
+│   ├── images/             # финальные PNG
+│   ├── sources/            # исходники: drawio, bpmn, puml, archimate
+│   ├── svg/                # векторные версии
+│   └── code/               # python-генераторы
+├── experiments/            # сравнение 7 моделей
+│   ├── results/            # results_*.json + predictions_*.csv
+│   ├── analytical_report_demo.md
+│   └── README.md           # выводы по моделям
+├── 01_baseline_tfidf.py    # TF-IDF + XGBoost
+├── 02_llm_pipeline.py      # универсальный Ollama-пайплайн
+├── 03_llm_gpt35.py         # GPT-3.5
+├── 04_deepseek_100.py      # DeepSeek на 100 отзывах
+├── 05_yandexgpt.py         # YandexGPT Pro
+├── 06_yandex_classifier.py # YandexGPT Embeddings/Classifier
+├── prompts.py              # системные промпты
+├── dashboard.py            # Streamlit-дашборд
+├── telegram_bot.py         # Telegram-бот (aiogram 3, multi-chat, файлы)
+├── test_set_500.csv        # балансированная выборка для эксперимента
+├── rureviews.csv           # полный датасет
+├── PROJECT_BRIEF.md        # бриф для передачи контекста
+├── requirements.txt
+└── .gitignore
 ```
 
 ## Быстрый старт
 
-### 1. Установка зависимостей
+### Воспроизвести эксперимент
 
 ```bash
-pip install pandas scikit-learn xgboost openai requests streamlit plotly aiogram
-```
-
-Установите Ollama: https://ollama.com
-
-```bash
-ollama pull qwen2.5:7b
-ollama pull deepseek-llm:7b
-```
-
-### 2. Скачивание датасета
-
-```bash
-curl -L -o rureviews.csv "https://raw.githubusercontent.com/sismetanin/rureviews/master/women-clothing-accessories.3-class.balanced.csv"
-```
-
-### 3. Запуск экспериментов
-
-```bash
-# Baseline
+pip install -r requirements.txt
 python 01_baseline_tfidf.py
-
-# LLM через Ollama
 python 02_llm_pipeline.py --model qwen2.5:7b
-python 02_llm_pipeline.py --model deepseek-llm:7b
-
-# YandexGPT (нужен API-ключ)
-export YANDEX_FOLDER_ID="b1g..."
-export YANDEX_API_KEY="..."
-python 05_yandexgpt.py
-python 06_yandex_classifier.py
 ```
 
-### 4. Запуск дашборда
+Результаты появятся в `experiments/results/`.
+
+### Запустить дашборд
 
 ```bash
 streamlit run dashboard.py
 ```
 
-Открыть: http://localhost:8501
+Откроется на http://localhost:8501 — четыре вкладки: Сравнение моделей, Анализ предсказаний, Инсайты LLM, Данные.
 
-### 5. Запуск Telegram-бота
+### Запустить Telegram-бот
 
 ```bash
-# Windows PowerShell
-$env:BOT_TOKEN="ваш_токен"
-python telegram_bot.py
+# Установить Ollama (https://ollama.com/download) и модель:
+ollama pull qwen2.5:7b
 
-# Linux/Mac
-export BOT_TOKEN="ваш_токен"
+# Запустить бота:
+export BOT_TOKEN=<токен от @BotFather>
 python telegram_bot.py
 ```
 
-## Технологический стек
+Бот: [@vkr_reviews_analyzer_bot](https://t.me/vkr_reviews_analyzer_bot)
 
-- **Python 3.10+**
-- **LLM:** Qwen 2.5 7B / DeepSeek LLM 7B / YandexGPT Pro
-- **ML:** scikit-learn, XGBoost
-- **Инфраструктура:** Ollama (self-hosted), Yandex Cloud (API)
-- **Визуализация:** Streamlit, Plotly
-- **Бот:** aiogram 3.x
+Команды:
+- `/analyze`, `/report`, `/stats`, `/alerts`, `/compare` — демо на встроенной выборке
+- `/chats` — список подключённых групповых чатов с inline-выбором
+- `/chat_analyze`, `/chat_stats` — анализ выбранного/текущего чата
+- **Любой текст** в личке → LLM делает аналитический разбор
+- **CSV / XLSX / TXT / JSON файл** → пакетный анализ содержимого
 
-## Датасет
+## Финальный текст ВКР
 
-**RuReviews** (Smetanin & Komarov, 2019):
-- 90 000 русскоязычных отзывов
-- 3 класса: positive / negative / neutral
-- Источник: [github.com/sismetanin/rureviews](https://github.com/sismetanin/rureviews)
+**[vkr_thesis/VKR_Biksalin_final.pdf](vkr_thesis/VKR_Biksalin_final.pdf)** (94 страницы, прошёл LMS НИУ ВШЭ).
 
-## Автор
+## Ключевые результаты (7 моделей, RuReviews-500)
 
-**Биксалин Артём**, группа ББИ 221
-НИУ ВШЭ, ВШБ, 2026
+| Модель | Macro F1 | Тип | Инсайты |
+|---|---:|---|:---:|
+| TF-IDF + XGBoost | **0,747** | классификатор | ❌ |
+| YandexGPT Embeddings + LogReg | 0,676 | классификатор (300 экз.) | ❌ |
+| YandexGPT Pro | 0,652 | LLM, облако | ✅ |
+| DeepSeek LLM 7B | 0,640 | LLM, self-hosted | ✅ |
+| **Qwen 2.5 7B** | 0,634 | **рекомендованная** self-hosted | ✅ |
+| DeepSeek R1 7B | 0,496 | reasoning | ⚠️ |
+| YandexGPT Classifier | 0,167 | zero-shot облачный | ❌ |
 
----
+Подробный разбор — в [experiments/README.md](experiments/README.md).
 
-*Проект создан в рамках ВКР по направлению "Бизнес-информатика".*
+## Реквизиты
+
+- **Автор**: Биксалин Артём Ильнурович, ББИ-221
+- **Научный руководитель**: Попов Виктор Юрьевич, профессор департамента бизнес-информатики ВШБ НИУ ВШЭ
+- **Защита**: 17.05.2026
+
+## Контакты
+
+Telegram: [@vkr_reviews_analyzer_bot](https://t.me/vkr_reviews_analyzer_bot)

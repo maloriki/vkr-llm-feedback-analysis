@@ -1,0 +1,53 @@
+<mxfile host="app.diagrams.net" agent="vkr-generator" version="22.0.0">
+  <diagram name="FigD_C4_Component_LLM_Pipeline" id="d1">
+    <mxGraphModel dx="1422" dy="757" grid="1" gridSize="10" guides="1" tooltips="1"
+                  connect="1" arrows="1" fold="1" page="1" pageScale="1"
+                  pageWidth="1700" pageHeight="1400"
+                  math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- Container Boundary: LLM Pipeline -->
+        <mxCell id="100" value="" style="whiteSpace=wrap;html=1;align=center;verticalAlign=top;fillColor=#F4F8FF;strokeColor=#3A7BBF;fontColor=#3A7BBF;fontSize=14;rounded=1;dashed=1;" vertex="1" parent="1"><mxGeometry x="440" y="80" width="780" height="1240" as="geometry"/></mxCell>
+        <mxCell id="101" value="&lt;b style=&quot;color:#3A7BBF;font-size:14px&quot;&gt;Контейнер &amp;laquo;LLM Pipeline&amp;raquo; (FastAPI)&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;strokeColor=none;fillColor=none;fontColor=#3A7BBF;fontSize=14;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="440" y="90" width="780" height="30" as="geometry"/></mxCell>
+
+        <!-- Внутренние компоненты (синий C4 component style) -->
+        <mxCell id="10" value="&lt;b style=&quot;color:white&quot;&gt;API Endpoint&lt;/b&gt;&lt;br&gt;&lt;i style=&quot;color:#DCE9F5&quot;&gt;[FastAPI route]&lt;/i&gt;&lt;br&gt;&lt;span style=&quot;color:#E7F0F7;font-size:10px&quot;&gt;Приём триггеров запуска,&lt;br&gt;статус задач, healthcheck&lt;/span&gt;" style="whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#85BBF0;strokeColor=#5D82A8;fontColor=#FFFFFF;fontSize=11;rounded=1;" vertex="1" parent="1"><mxGeometry x="520" y="160" width="620" height="120" as="geometry"/></mxCell>
+
+        <mxCell id="11" value="&lt;b style=&quot;color:white&quot;&gt;Data Loader&lt;/b&gt;&lt;br&gt;&lt;i style=&quot;color:#DCE9F5&quot;&gt;[Python, psycopg2]&lt;/i&gt;&lt;br&gt;&lt;span style=&quot;color:#E7F0F7;font-size:10px&quot;&gt;Выгрузка сырых отзывов и сообщений&lt;br&gt;из Data Lake по фильтрам периода/источника&lt;/span&gt;" style="whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#85BBF0;strokeColor=#5D82A8;fontColor=#FFFFFF;fontSize=11;rounded=1;" vertex="1" parent="1"><mxGeometry x="520" y="320" width="620" height="120" as="geometry"/></mxCell>
+
+        <mxCell id="12" value="&lt;b style=&quot;color:white&quot;&gt;Preprocessor&lt;/b&gt;&lt;br&gt;&lt;i style=&quot;color:#DCE9F5&quot;&gt;[Python, regex]&lt;/i&gt;&lt;br&gt;&lt;span style=&quot;color:#E7F0F7;font-size:10px&quot;&gt;Очистка HTML/emoji, нормализация пробелов,&lt;br&gt;дедупликация, фильтрация по длине&lt;/span&gt;" style="whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#85BBF0;strokeColor=#5D82A8;fontColor=#FFFFFF;fontSize=11;rounded=1;" vertex="1" parent="1"><mxGeometry x="520" y="480" width="620" height="120" as="geometry"/></mxCell>
+
+        <mxCell id="13" value="&lt;b style=&quot;color:white&quot;&gt;Auto-Batcher&lt;/b&gt;&lt;br&gt;&lt;i style=&quot;color:#DCE9F5&quot;&gt;[Python, tiktoken]&lt;/i&gt;&lt;br&gt;&lt;span style=&quot;color:#E7F0F7;font-size:10px&quot;&gt;batch_size = floor(context_window&lt;br&gt;&amp;times; fill_ratio / avg_token_count)&lt;/span&gt;" style="whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#85BBF0;strokeColor=#5D82A8;fontColor=#FFFFFF;fontSize=11;rounded=1;" vertex="1" parent="1"><mxGeometry x="520" y="640" width="620" height="120" as="geometry"/></mxCell>
+
+        <mxCell id="14" value="&lt;b style=&quot;color:white&quot;&gt;Map Worker&lt;/b&gt;&lt;br&gt;&lt;i style=&quot;color:#DCE9F5&quot;&gt;[Python, async]&lt;/i&gt;&lt;br&gt;&lt;span style=&quot;color:#E7F0F7;font-size:10px&quot;&gt;Map-фаза: формирование промпта,&lt;br&gt;вызов LLM, парсинг ответа (JSON)&lt;/span&gt;" style="whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#85BBF0;strokeColor=#5D82A8;fontColor=#FFFFFF;fontSize=11;rounded=1;" vertex="1" parent="1"><mxGeometry x="520" y="800" width="620" height="120" as="geometry"/></mxCell>
+
+        <mxCell id="15" value="&lt;b style=&quot;color:white&quot;&gt;Reducer&lt;/b&gt;&lt;br&gt;&lt;i style=&quot;color:#DCE9F5&quot;&gt;[Python]&lt;/i&gt;&lt;br&gt;&lt;span style=&quot;color:#E7F0F7;font-size:10px&quot;&gt;Reduce-фаза: агрегация topic-распределений,&lt;br&gt;sentiment, формирование топ-проблем&lt;/span&gt;" style="whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#85BBF0;strokeColor=#5D82A8;fontColor=#FFFFFF;fontSize=11;rounded=1;" vertex="1" parent="1"><mxGeometry x="520" y="960" width="620" height="120" as="geometry"/></mxCell>
+
+        <mxCell id="16" value="&lt;b style=&quot;color:white&quot;&gt;Result Writer&lt;/b&gt;&lt;br&gt;&lt;i style=&quot;color:#DCE9F5&quot;&gt;[Python, SQLAlchemy]&lt;/i&gt;&lt;br&gt;&lt;span style=&quot;color:#E7F0F7;font-size:10px&quot;&gt;Запись итогового отчёта,&lt;br&gt;промежуточных results, метаданных&lt;/span&gt;" style="whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#85BBF0;strokeColor=#5D82A8;fontColor=#FFFFFF;fontSize=11;rounded=1;" vertex="1" parent="1"><mxGeometry x="520" y="1120" width="620" height="120" as="geometry"/></mxCell>
+
+        <!-- Внешние контейнеры (вне Container Boundary) -->
+        <mxCell id="20" value="&lt;b style=&quot;color:white&quot;&gt;Data Lake&lt;/b&gt;&lt;br&gt;&lt;i style=&quot;color:#DDD;font-size:10px&quot;&gt;[PostgreSQL + MinIO]&lt;/i&gt;" style="whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#3B7FC4;strokeColor=#2A5F94;fontColor=#FFFFFF;fontSize=11;rounded=1;" vertex="1" parent="1"><mxGeometry x="120" y="340" width="240" height="80" as="geometry"/></mxCell>
+
+        <mxCell id="21" value="&lt;b style=&quot;color:white&quot;&gt;LLM Model Server&lt;/b&gt;&lt;br&gt;&lt;i style=&quot;color:#DDD;font-size:10px&quot;&gt;[vLLM / Ollama]&lt;/i&gt;" style="whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#3B7FC4;strokeColor=#2A5F94;fontColor=#FFFFFF;fontSize=11;rounded=1;" vertex="1" parent="1"><mxGeometry x="1300" y="820" width="240" height="80" as="geometry"/></mxCell>
+
+        <mxCell id="22" value="&lt;b style=&quot;color:white&quot;&gt;Аналитическая БД&lt;/b&gt;&lt;br&gt;&lt;i style=&quot;color:#DDD;font-size:10px&quot;&gt;[PostgreSQL]&lt;/i&gt;" style="whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#3B7FC4;strokeColor=#2A5F94;fontColor=#FFFFFF;fontSize=11;rounded=1;" vertex="1" parent="1"><mxGeometry x="1300" y="1140" width="240" height="80" as="geometry"/></mxCell>
+
+        <!-- РЁБРА: основной поток сверху вниз внутри Container -->
+        <mxCell id="30" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#707070;startArrow=none;endArrow=classic;jettySize=auto;orthogonalLoop=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" source="10" target="11" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="31" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#707070;startArrow=none;endArrow=classic;jettySize=auto;orthogonalLoop=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" source="11" target="12" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="32" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#707070;startArrow=none;endArrow=classic;jettySize=auto;orthogonalLoop=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" source="12" target="13" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="33" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#707070;startArrow=none;endArrow=classic;jettySize=auto;orthogonalLoop=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" source="13" target="14" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="34" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#707070;startArrow=none;endArrow=classic;jettySize=auto;orthogonalLoop=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" source="14" target="15" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="35" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#707070;startArrow=none;endArrow=classic;jettySize=auto;orthogonalLoop=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" source="15" target="16" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+        <!-- Внешние связи -->
+        <mxCell id="40" value="SQL-запрос" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#707070;startArrow=none;endArrow=classic;jettySize=auto;orthogonalLoop=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontSize=11;fontColor=#444;" edge="1" source="20" target="11" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="41" value="Промпт / ответ" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#707070;startArrow=classic;endArrow=classic;jettySize=auto;orthogonalLoop=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontSize=11;fontColor=#444;" edge="1" source="14" target="21" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="42" value="INSERT" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#707070;startArrow=none;endArrow=classic;jettySize=auto;orthogonalLoop=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontSize=11;fontColor=#444;" edge="1" source="16" target="22" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

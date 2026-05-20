@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                  xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI"
+                  xmlns:dc="http://www.omg.org/spec/DD/20100524/DC"
+                  xmlns:di="http://www.omg.org/spec/DD/20100524/DI"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  id="Definitions_1"
+                  targetNamespace="http://bpmn.io/schema/bpmn">
+
+  <bpmn:collaboration id="Collaboration_1">
+    <bpmn:participant id="Participant_IAS"
+                      name="ИАС (LLM-конвейер, авто-аналитика)"/>
+    <bpmn:participant id="Participant_Manager"
+                      name="Менеджер по качеству сервиса"
+                      processRef="Process_Manager"/>
+    <bpmn:messageFlow id="MsgFlow_Alert"
+                      name="критический инсайт"
+                      sourceRef="Participant_IAS"
+                      targetRef="Start_MsgAlert"/>
+    <bpmn:messageFlow id="MsgFlow_Dashboard"
+                      name="запрос дашборда"
+                      sourceRef="Task_OpenDashboard"
+                      targetRef="Participant_IAS"/>
+  </bpmn:collaboration>
+
+  <bpmn:process id="Process_Manager" isExecutable="false">
+
+    <bpmn:laneSet id="LaneSet_1">
+      <bpmn:lane id="Lane_Manager" name="Менеджер по качеству">
+        <bpmn:flowNodeRef>Start_MsgAlert</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_OpenDashboard</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Study</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_Action</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Priority</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_CreateTask</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Notify</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_Solved</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_NoAction</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Start_TimerWeekly</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Trends</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Task_Recommend</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>End_Summary</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+
+    <!-- ===================== ОСНОВНАЯ ЦЕПОЧКА (по алерту) ===================== -->
+
+    <bpmn:startEvent id="Start_MsgAlert" name="Алерт от ИАС">
+      <bpmn:outgoing>Flow_S1</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MsgDef_1"/>
+    </bpmn:startEvent>
+
+    <bpmn:userTask id="Task_OpenDashboard" name="Открывает дашборд">
+      <bpmn:incoming>Flow_S1</bpmn:incoming>
+      <bpmn:outgoing>Flow_S2</bpmn:outgoing>
+    </bpmn:userTask>
+
+    <bpmn:userTask id="Task_Study" name="Изучает топ-проблему (drill-down)">
+      <bpmn:incoming>Flow_S2</bpmn:incoming>
+      <bpmn:outgoing>Flow_S3</bpmn:outgoing>
+    </bpmn:userTask>
+
+    <bpmn:exclusiveGateway id="Gateway_Action" name="Требуется действие?">
+      <bpmn:incoming>Flow_S3</bpmn:incoming>
+      <bpmn:outgoing>Flow_Yes</bpmn:outgoing>
+      <bpmn:outgoing>Flow_No</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+
+    <bpmn:userTask id="Task_Priority" name="Определяет приоритет и SLA">
+      <bpmn:incoming>Flow_Yes</bpmn:incoming>
+      <bpmn:outgoing>Flow_S4</bpmn:outgoing>
+    </bpmn:userTask>
+
+    <bpmn:userTask id="Task_CreateTask" name="Создаёт задачу команде (Tracker)">
+      <bpmn:incoming>Flow_S4</bpmn:incoming>
+      <bpmn:outgoing>Flow_S5</bpmn:outgoing>
+    </bpmn:userTask>
+
+    <bpmn:userTask id="Task_Notify" name="Уведомляет ответственного">
+      <bpmn:incoming>Flow_S5</bpmn:incoming>
+      <bpmn:outgoing>Flow_S6</bpmn:outgoing>
+    </bpmn:userTask>
+
+    <bpmn:endEvent id="End_Solved" name="Решение принято">
+      <bpmn:incoming>Flow_S6</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <bpmn:endEvent id="End_NoAction" name="Действия не требуется">
+      <bpmn:incoming>Flow_No</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <!-- ===================== АЛЬТЕРНАТИВНАЯ ЦЕПОЧКА (по таймеру) ===================== -->
+
+    <bpmn:startEvent id="Start_TimerWeekly" name="Понедельник 09:00 (плановый обзор)">
+      <bpmn:outgoing>Flow_T1</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="TimerDef_1"/>
+    </bpmn:startEvent>
+
+    <bpmn:userTask id="Task_Trends" name="Просматривает тренды и сводку за неделю">
+      <bpmn:incoming>Flow_T1</bpmn:incoming>
+      <bpmn:outgoing>Flow_T2</bpmn:outgoing>
+    </bpmn:userTask>
+
+    <bpmn:userTask id="Task_Recommend" name="Формулирует рекомендации продуктовой команде">
+      <bpmn:incoming>Flow_T2</bpmn:incoming>
+      <bpmn:outgoing>Flow_T3</bpmn:outgoing>
+    </bpmn:userTask>
+
+    <bpmn:endEvent id="End_Summary" name="Сводка отправлена">
+      <bpmn:incoming>Flow_T3</bpmn:incoming>
+    </bpmn:endEvent>
+
+    <!-- ===================== SEQUENCE FLOWS ===================== -->
+    <bpmn:sequenceFlow id="Flow_S1" sourceRef="Start_MsgAlert"    targetRef="Task_OpenDashboard"/>
+    <bpmn:sequenceFlow id="Flow_S2" sourceRef="Task_OpenDashboard" targetRef="Task_Study"/>
+    <bpmn:sequenceFlow id="Flow_S3" sourceRef="Task_Study"         targetRef="Gateway_Action"/>
+    <bpmn:sequenceFlow id="Flow_Yes" name="Да"  sourceRef="Gateway_Action" targetRef="Task_Priority"/>
+    <bpmn:sequenceFlow id="Flow_No"  name="Нет" sourceRef="Gateway_Action" targetRef="End_NoAction"/>
+    <bpmn:sequenceFlow id="Flow_S4" sourceRef="Task_Priority"   targetRef="Task_CreateTask"/>
+    <bpmn:sequenceFlow id="Flow_S5" sourceRef="Task_CreateTask" targetRef="Task_Notify"/>
+    <bpmn:sequenceFlow id="Flow_S6" sourceRef="Task_Notify"     targetRef="End_Solved"/>
+    <bpmn:sequenceFlow id="Flow_T1" sourceRef="Start_TimerWeekly" targetRef="Task_Trends"/>
+    <bpmn:sequenceFlow id="Flow_T2" sourceRef="Task_Trends"       targetRef="Task_Recommend"/>
+    <bpmn:sequenceFlow id="Flow_T3" sourceRef="Task_Recommend"    targetRef="End_Summary"/>
+
+  </bpmn:process>
+
+  <!-- =========================================================================== -->
+  <!-- =========================== DIAGRAM INTERCHANGE =========================== -->
+  <!-- =========================================================================== -->
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_1">
+
+      <!-- ============== Participants & Lanes ============== -->
+      <bpmndi:BPMNShape id="Shape_Participant_IAS" bpmnElement="Participant_IAS" isHorizontal="true">
+        <dc:Bounds x="160" y="60" width="1500" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_Participant_Manager" bpmnElement="Participant_Manager" isHorizontal="true">
+        <dc:Bounds x="160" y="200" width="1500" height="560"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_Lane_Manager" bpmnElement="Lane_Manager" isHorizontal="true">
+        <dc:Bounds x="190" y="200" width="1470" height="560"/>
+      </bpmndi:BPMNShape>
+
+      <!-- ============== Main chain (alert-driven) ============== -->
+      <bpmndi:BPMNShape id="Shape_Start_MsgAlert" bpmnElement="Start_MsgAlert">
+        <dc:Bounds x="252" y="312" width="36" height="36"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="232" y="355" width="80" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_Task_OpenDashboard" bpmnElement="Task_OpenDashboard">
+        <dc:Bounds x="340" y="290" width="100" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_Task_Study" bpmnElement="Task_Study">
+        <dc:Bounds x="490" y="290" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_Gateway_Action" bpmnElement="Gateway_Action" isMarkerVisible="true">
+        <dc:Bounds x="665" y="305" width="50" height="50"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="652" y="365" width="80" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_Task_Priority" bpmnElement="Task_Priority">
+        <dc:Bounds x="775" y="290" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_Task_CreateTask" bpmnElement="Task_CreateTask">
+        <dc:Bounds x="945" y="290" width="130" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_Task_Notify" bpmnElement="Task_Notify">
+        <dc:Bounds x="1125" y="290" width="120" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_End_Solved" bpmnElement="End_Solved">
+        <dc:Bounds x="1295" y="312" width="36" height="36"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="1278" y="355" width="72" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_End_NoAction" bpmnElement="End_NoAction">
+        <dc:Bounds x="672" y="450" width="36" height="36"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="640" y="495" width="100" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <!-- ============== Timer chain ============== -->
+      <bpmndi:BPMNShape id="Shape_Start_TimerWeekly" bpmnElement="Start_TimerWeekly">
+        <dc:Bounds x="252" y="612" width="36" height="36"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="220" y="655" width="100" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_Task_Trends" bpmnElement="Task_Trends">
+        <dc:Bounds x="340" y="590" width="150" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_Task_Recommend" bpmnElement="Task_Recommend">
+        <dc:Bounds x="540" y="590" width="170" height="80"/>
+      </bpmndi:BPMNShape>
+
+      <bpmndi:BPMNShape id="Shape_End_Summary" bpmnElement="End_Summary">
+        <dc:Bounds x="760" y="612" width="36" height="36"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="740" y="655" width="80" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+
+      <!-- ============== Sequence flow edges ============== -->
+      <bpmndi:BPMNEdge id="Edge_Flow_S1" bpmnElement="Flow_S1">
+        <di:waypoint x="288" y="330"/>
+        <di:waypoint x="340" y="330"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_S2" bpmnElement="Flow_S2">
+        <di:waypoint x="440" y="330"/>
+        <di:waypoint x="490" y="330"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_S3" bpmnElement="Flow_S3">
+        <di:waypoint x="610" y="330"/>
+        <di:waypoint x="665" y="330"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_Yes" bpmnElement="Flow_Yes">
+        <di:waypoint x="715" y="330"/>
+        <di:waypoint x="775" y="330"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="735" y="312" width="20" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_No" bpmnElement="Flow_No">
+        <di:waypoint x="690" y="355"/>
+        <di:waypoint x="690" y="450"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="700" y="390" width="20" height="14"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_S4" bpmnElement="Flow_S4">
+        <di:waypoint x="895" y="330"/>
+        <di:waypoint x="945" y="330"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_S5" bpmnElement="Flow_S5">
+        <di:waypoint x="1075" y="330"/>
+        <di:waypoint x="1125" y="330"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_S6" bpmnElement="Flow_S6">
+        <di:waypoint x="1245" y="330"/>
+        <di:waypoint x="1295" y="330"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_T1" bpmnElement="Flow_T1">
+        <di:waypoint x="288" y="630"/>
+        <di:waypoint x="340" y="630"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_T2" bpmnElement="Flow_T2">
+        <di:waypoint x="490" y="630"/>
+        <di:waypoint x="540" y="630"/>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_Flow_T3" bpmnElement="Flow_T3">
+        <di:waypoint x="710" y="630"/>
+        <di:waypoint x="760" y="630"/>
+      </bpmndi:BPMNEdge>
+
+      <!-- ============== Message flow edges ============== -->
+      <bpmndi:BPMNEdge id="Edge_MsgFlow_Alert" bpmnElement="MsgFlow_Alert">
+        <di:waypoint x="270" y="140"/>
+        <di:waypoint x="270" y="312"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="282" y="200" width="100" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Edge_MsgFlow_Dashboard" bpmnElement="MsgFlow_Dashboard">
+        <di:waypoint x="390" y="290"/>
+        <di:waypoint x="390" y="140"/>
+        <bpmndi:BPMNLabel><dc:Bounds x="402" y="200" width="100" height="27"/></bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+
+</bpmn:definitions>
